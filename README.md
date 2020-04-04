@@ -1,2 +1,2 @@
-# HateosBuilder
-.NET Standard Library allowing convenient creation of HATEOS for REST API models
+# HateoasBuilder
+.NET Standard Library allowing convenient creation of HATEOAS for REST API models
