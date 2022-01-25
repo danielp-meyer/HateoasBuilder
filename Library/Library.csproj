@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AssemblyName>MeyerCorp.HateoasBuilder</AssemblyName>
+    <RootNamespace>MeyerCorp.HateoasBuilder</RootNamespace>
+    <PackageId>MeyerCorp.HateoasBuilder</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>danielpmeyer</Authors>
+    <Company>Meyer Corporation</Company>
+    <Description>Extension based builder for creating HATEOAS links in RESTful reponses.</Description>
+    <Copyright>2022, Meyer Corporation</Copyright>
+    <PackageProjectUrl>https://github.com/MeyerCorporation/HateoasBuilder</PackageProjectUrl>
+    <PackageIcon>Meyer_M_Blue.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/MeyerCorporation/HateoasBuilder.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>HATEOAS, WebAPI, REST</PackageTags>
+    <PackageReleaseNotes>Initial creation</PackageReleaseNotes>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Meyer_M_Blue.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
