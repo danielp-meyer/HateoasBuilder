@@ -20,10 +20,10 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddLinkExternal(string baseUrl, string rel, string format, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(rel)) throw new ArgumentNullException("rel", "Parameter cannot be null, empty or whitespace.");
-            if (String.IsNullOrWhiteSpace(format)) throw new ArgumentNullException("rel", "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(rel)) throw new ArgumentNullException(nameof(rel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(format)) throw new ArgumentNullException(nameof(rel), "Parameter cannot be null, empty or whitespace.");
 
-            if (formatItems != null && formatItems.Count() > 0 && !formatItems.Any(i => i == null || String.IsNullOrWhiteSpace(i.ToString())))
+            if (formatItems != null && formatItems.Length > 0 && !formatItems.Any(i => i == null || String.IsNullOrWhiteSpace(i.ToString())))
             {
                 RelHrefPairs.Add(rel);
                 RelHrefPairs.Add(String.Concat(baseUrl.TrimEnd('/'), '/', String.Format(format, formatItems)));
@@ -34,15 +34,15 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddLink(string? rel, string? format, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(rel)) throw new ArgumentNullException("rel", "Parameter cannot be null, empty or whitespace.");
-            if (String.IsNullOrWhiteSpace(format)) throw new ArgumentNullException("format", "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(rel)) throw new ArgumentNullException(nameof(rel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(format)) throw new ArgumentNullException(nameof(format), "Parameter cannot be null, empty or whitespace.");
 
             if (formatItems.Length < 1 && !String.IsNullOrWhiteSpace(format))
             {
                 RelHrefPairs.Add(rel);
                 RelHrefPairs.Add(String.Concat(BaseUrl.TrimEnd('/'), '/', format));
             }
-            else if (formatItems.Count() > 0 && !formatItems.Any(i => i == null || String.IsNullOrWhiteSpace(i.ToString())))
+            else if (formatItems.Length > 0 && !formatItems.Any(i => i == null || String.IsNullOrWhiteSpace(i.ToString())))
             {
                 RelHrefPairs.Add(rel);
                 RelHrefPairs.Add(String.Concat(BaseUrl.TrimEnd('/'), '/', String.Format(format, formatItems)));
