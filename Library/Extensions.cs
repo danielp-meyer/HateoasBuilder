@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,13 +7,36 @@ namespace MeyerCorp.HateoasBuilder
 {
     public static class Extensions
     {
-        public static LinkBuilder AddLink(this string baseUrl, string rel, string format, params object[] formatItems)
+        public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? relPathFormat, params object[] formatItems)
+        {
+            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+
+            var request =httpContext.Request;
+            var baseurl = $"{request.Scheme}://{request.Host}/";
+
+
+            return baseurl.AddLink(relLabel, relPathFormat, formatItems);
+        }
+
+        //public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? relPathFormat, params object[] formatItems)
+        //{
+        //    if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("A link type label must be set.", nameof(relLabel));
+        //    if (String.IsNullOrWhiteSpace(relPath)) throw new ArgumentException("A link path must be set.", nameof(relPathFormat));
+
+        //    return httpContext
+        //            .Request
+        //            .PathBase
+        //            .Value
+        //            .AddLink(relLabel, relPathFormat, formatItems);
+        //}
+
+        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string? relPathFormat, params object[] formatItems)
         {
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
 
             var output = new LinkBuilder(baseUrl);
 
-            return output.AddLink(rel, format, formatItems);
+            return output.AddLink(relLabel, relPathFormat, formatItems);
         }
 
         public static LinkBuilder AddLinks(this string baseUrl, string rel, string format, IEnumerable<string> items)
@@ -28,6 +52,7 @@ namespace MeyerCorp.HateoasBuilder
         {
             return links.ToHref("self");
         }
+
         public static string ToHref(this IEnumerable<Link> links, string rel)
         {
             return links.SingleOrDefault(l => l.Rel == rel).Href;
