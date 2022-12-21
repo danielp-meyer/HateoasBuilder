@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "Library"
+		},
+		{
+			"path": "Test"
+		},
+		{
+			"path": "WebSample"
+		}
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen",
+		"powershell.cwd": "c:\\Users\\przyd\\source\\Meyer\\ASN\\AzureASN\\asn-special"
+	}
+}
