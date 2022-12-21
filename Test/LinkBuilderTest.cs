@@ -1,61 +1,54 @@
-using MeyerCorp.HateoasBuilder;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace MeyerCorp.HateoasBuilder.Test
 {
     public class LinkBuilderTest
     {
-        [Fact(DisplayName = "LinkBuilderTest: Check RelHrefPairs property.")]
-        public void LinkBuilder1Test()
+        [Theory(DisplayName = "Constructor (fail).")]
+        [InlineData("")]
+        [InlineData("\t")]
+        [InlineData(null)]
+        public void ConstructorFailTest(string baseUrl)
         {
-            var test = new LinkBuilder(String.Empty);
+            var caught = Assert.Throws<ArgumentNullException>(() => new LinkBuilder(baseUrl));
 
-            Assert.Empty(test.GetLinks());
+            Assert.Equal("Value cannot be null. (Parameter 'baseUrl')", caught.Message);
         }
 
-        [Fact(DisplayName = "LinkBuilderTest: Check null/empty parameters.")]
-        public void LinkBuilder2Test()
+        [Theory(DisplayName = "Check null/empty parameters.")]
+        [InlineData(null, "asdf", new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')")]
+        [InlineData("asdf", null, new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData("", "asdf", new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')")]
+        [InlineData("asdf", "", new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData("asdf", null, new object[] { }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData("asdf", "", new object[] { }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
+        public void LinkBuilder1Test(string? relLabel, string? relPathFormat, IEnumerable<object> formatItems, string message)
         {
-            var test = new LinkBuilder(String.Empty);
+            var test = new LinkBuilder("https:meyerus.com");
 
-            Assert.Throws<ArgumentNullException>(() => test.AddLink(null, "asdf", "test"));
-            Assert.Throws<ArgumentNullException>(() => test.AddLink("asdf", null, "test"));
-            Assert.Throws<ArgumentNullException>(() => test.AddLink(string.Empty, "asdf", "test"));
-            Assert.Throws<ArgumentNullException>(() => test.AddLink("asdf", string.Empty, "test"));
-            Assert.Throws<ArgumentNullException>(() => test.AddLink("asdf", null, "null"));
-            Assert.Throws<ArgumentNullException>(() => test.AddLink("asdf", string.Empty, "null"));
+            var caught = Assert.Throws<ArgumentNullException>(() => test.AddLink(relLabel, relPathFormat, formatItems));
+
+            Assert.Equal(message, caught.Message);
         }
 
-        [Fact(DisplayName = "LinkBuilderTest: Check single link.")]
-        public void LinkBuilder4Test()
+        [Theory(DisplayName = "Check single link.")]
+        [InlineData("http://foo.bar/asdfuno", "asdf{0}", new string[] { "uno" })]
+        [InlineData("http://foo.bar/asdfunodos", "asdf{0}{1}", new string[] { "uno", "dos" })]
+        [InlineData("http://foo.bar/asdftestdostres", "asdf{0}{1}{2}", new string[] { "test", "dos", "tres" })]
+        public void LinkBuilder2Test(string result, string format, string[] items)
         {
+            const string rel = "rel";
             var test = new LinkBuilder("http://foo.bar");
 
-            test.AddLink("rel", "asdf{0}", "uno");
+            test.AddLink(rel, format, items.ToArray());
             Assert.Single(test.GetLinks());
             Assert.Equal(new Link
             {
-                Href = "http://foo.bar/asdfuno",
-                Rel = "rel",
-            }, test[0]);
-
-            test = new LinkBuilder("http://foo.bar");
-            test.AddLink("rel", "asdf{0}{1}", "uno", "dos");
-            Assert.Single(test.GetLinks());
-            Assert.Equal(new Link
-            {
-                Href = "http://foo.bar/asdfunodos",
-                Rel = "rel",
-            }, test[0]);
-
-            test = new LinkBuilder("http://foo.bar");
-            test.AddLink("rel", "asdf{0}{1}{2}", "test", "dos", "tres");
-            Assert.Single(test.GetLinks());
-            Assert.Equal(new Link
-            {
-                Href = "http://foo.bar/asdftestdostres",
-                Rel = "rel",
+                Href = result,
+                Rel = rel,
             }, test[0]);
         }
     }
