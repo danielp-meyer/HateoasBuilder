@@ -9,8 +9,8 @@
     <Version>1.0.0-preview-1</Version>
     <Authors>danielpmeyer</Authors>
     <Company>Meyer Corporation</Company>
-    <Description>Extension based builder for creating HATEOAS links in RESTful reponses.</Description>
-    <Copyright>2022, Meyer Corporation</Copyright>
+    <Description>Extension based builder for creating HATEOAS links in RESTful reponses in .NET.</Description>
+    <Copyright>2023, Meyer Corporation</Copyright>
     <PackageProjectUrl>https://github.com/MeyerCorporation/HateoasBuilder</PackageProjectUrl>
     <PackageIcon>Meyer_M_Blue.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -20,14 +20,9 @@
     <PackageReleaseNotes>Initial creation</PackageReleaseNotes>
     <NeutralLanguage>en-US</NeutralLanguage>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>.NET Standard Library allowing convenient creation of HATEOAS for REST API models</Title>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
