@@ -25,7 +25,7 @@ jobs:
         uses: Elskom/build-dotnet@v1.1.1
         with:
           # Filepath of the solution of which contains all the projects to be built, optionally tested and packed, relative to root of repository
-          SOLUTION_FILE_PATH: ./Library
+          SOLUTION_FILE_PATH: ./
           # Flag to toggle running unit tests for the projects built, disabled by default
           TEST: true
           # Flag to toggle packing the projects built
