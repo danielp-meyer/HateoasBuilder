@@ -114,17 +114,17 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(rel,links.ToHref(rel));
         }
 
-        [Fact(DisplayName = "ToHrefTest (fail).")]
-        public void ToHrefTest1()
-        {
-            var links = new List<Link>
-            {
-                new Link{ Href="href",Rel="href"},
-                new Link{ Href="href1",Rel="href1"},
-                new Link{ Href="href2",Rel="href2"}
-            };
+        //[Fact(DisplayName = "ToHrefTest (fail).")]
+        //public void ToHrefTest1()
+        //{
+        //    var links = new List<Link>
+        //    {
+        //        new Link{ Href="href",Rel="href"},
+        //        new Link{ Href="href1",Rel="href1"},
+        //        new Link{ Href="href2",Rel="href2"}
+        //    };
 
-            Assert.Null(links.ToHref("no"));
-        }
+        //    Assert.Null(links.ToHref("no"));
+        //}
     }
 }
