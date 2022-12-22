@@ -25,4 +25,4 @@ jobs:
           version: 1.0.0
           project-path: Test/Library.csproj
           solution-path: Main.sln
-          nuget-feed-password: ${{ secrets.PACKAGES_TOKEN }}
+          nuget-feed-password: ${{ secrets.NUGETDEPLOY }}
