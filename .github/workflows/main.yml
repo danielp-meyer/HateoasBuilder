@@ -7,26 +7,22 @@ on:
       - main
 
 jobs:
-  Package:
+  publish:
+    name: build, pack, test & publish
     runs-on: ubuntu-latest
-
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+      NUGET_API_KEY: ${{ secrets.NUGETDEPLOY }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@main
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: "6.0"
+      - name: Install latest .NET SDK
+        uses: Elskom/setup-latest-dotnet@main
 
-      - name: Build DotNet
-        # You may pin to the exact commit or the version.
-        # uses: Elskom/build-dotnet@54d97a0f7d5d5ca946404976db00d27386b09254
-        uses: Elskom/build-dotnet@v1.1.1
+      - name: Restore, Build, test, and pack
+        uses: Elskom/build-dotnet@main
         with:
-          # Filepath of the solution of which contains all the projects to be built, optionally tested and packed, relative to root of repository
-          SOLUTION_FILE_PATH: ./
-          # Flag to toggle running unit tests for the projects built, disabled by default
           TEST: true
-          PUSH: true
-    
+          PACK: true
