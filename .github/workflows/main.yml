@@ -7,22 +7,39 @@ on:
       - main
 
 jobs:
-  publish:
-    name: build, pack, test & publish
+  Package:
     runs-on: ubuntu-latest
-    env:
-      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-      DOTNET_CLI_TELEMETRY_OPTOUT: true
-      DOTNET_NOLOGO: true
-      NUGET_API_KEY: ${{ secrets.NUGETDEPLOY }}
     steps:
-      - uses: actions/checkout@main
-
-      - name: Install latest .NET SDK
-        uses: Elskom/setup-latest-dotnet@main
-
-      - name: Restore, Build, test, and pack
-        uses: Elskom/build-dotnet@main
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
         with:
+          dotnet-version: "6.0"
+      - name: Build DotNet
+        # You may pin to the exact commit or the version.
+        # uses: Elskom/build-dotnet@54d97a0f7d5d5ca946404976db00d27386b09254
+        uses: Elskom/build-dotnet@v1.1.1
+        with:
+          # Filepath of the solution of which contains all the projects to be built, optionally tested and packed, relative to root of repository
+          SOLUTION_FILE_PATH: ./
+          # Flag to toggle running unit tests for the projects built, disabled by default
           TEST: true
+          # Flag to toggle packing the projects built
           PACK: true
+
+      - name: NuGet push
+        # You may pin to the exact commit or the version.
+        # uses: edumserrano/nuget-push@b51b6fd4ba089731574dc4a642c6da356c8f8447
+        uses: edumserrano/nuget-push@v1.2.0
+        with:
+          # The API key for the NuGet server. Used when pushing the NuGet packages and symbols.
+          api-key: ${{ secrets.NUGETDEPLOY }}
+          # Indicates whether this actions should fail if the NuGet package being pushed already exists. Defaults to false.
+          #fail-if-exists: # optional, default is false
+          # The directory that will be used to push NuGet packages. It will push all NuGet packages (*.nupkg) and corresponding symbol packages (*.snupkg) present in the directory.
+          #working-directory: # optional
+          # The filepath for the NuGet package to be pushed.
+          #nuget-package: # optional
+          # The filepath for the symbols package to be pushed.
+          #symbols-package: # optional
