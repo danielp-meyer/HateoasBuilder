@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Xunit;
@@ -74,7 +75,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         [Theory(DisplayName = "BaseUrl.AddLink (fail).")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "", "relPathFormat", new object[] { "ball" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", null, "relPathFormat", new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "\t","relPathFormat", new object[] { "ball", "dingle", 2 })]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "\t", "relPathFormat", new object[] { "ball", "dingle", 2 })]
         public void AddLinkTest3(string result, string? baseUrl, string? relPathFormat, object[] items)
         {
             const string relLabel = "rel";
@@ -87,7 +88,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         [Theory(DisplayName = "BaseUrl.AddLink (fail2).")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", "", new object[] { "ball" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", null, new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar","\t", new object[] { "ball", "dingle", 2 })]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", "\t", new object[] { "ball", "dingle", 2 })]
         public void AddLinkTest4(string result, string? baseUrl, string? relPathFormat, object[] items)
         {
             const string relLabel = "rel";
@@ -95,6 +96,35 @@ namespace MeyerCorp.HateoasBuilder.Test
             var caught = Assert.Throws<ArgumentNullException>(() => baseUrl.AddLink(relLabel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
+        }
+
+        [Theory(DisplayName = "ToHrefTest (pass).")]
+        [InlineData("href")]
+        [InlineData("href2")]
+        [InlineData("href1")]
+        public void ToHrefTest(string rel)
+        {
+            var links = new List<Link>
+            {
+                new Link{ Href="href",Rel="href"},
+                new Link{ Href="href1",Rel="href1"},
+                new Link{ Href="href2",Rel="href2"}
+            };
+
+            Assert.Equal(rel,links.ToHref(rel));
+        }
+
+        [Fact(DisplayName = "ToHrefTest (fail).")]
+        public void ToHrefTest1()
+        {
+            var links = new List<Link>
+            {
+                new Link{ Href="href",Rel="href"},
+                new Link{ Href="href1",Rel="href1"},
+                new Link{ Href="href2",Rel="href2"}
+            };
+
+            Assert.Null(links.ToHref("no"));
         }
     }
 }

@@ -11,7 +11,7 @@ namespace MeyerCorp.HateoasBuilder
         {
             if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
 
-            var request =httpContext.Request;
+            var request = httpContext.Request;
             var baseurl = $"{request.Scheme}://{request.Host}/";
 
 
@@ -55,7 +55,10 @@ namespace MeyerCorp.HateoasBuilder
 
         public static string ToHref(this IEnumerable<Link> links, string rel)
         {
-            return links.SingleOrDefault(l => l.Rel == rel).Href;
+            if (links == null) throw new ArgumentNullException(nameof(links));
+            if (String.IsNullOrWhiteSpace(rel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(rel));
+
+            return links.Single(l => l.Rel == rel).Href;
         }
 
         public static TResult[] ToNullFilteredArray<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
