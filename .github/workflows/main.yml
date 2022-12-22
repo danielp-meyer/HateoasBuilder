@@ -4,7 +4,7 @@ name: Publish NuGet Package on Push to Main
 on:
   push:
     branches:
-      - mainX
+      - main
 
 jobs:
   Package:
