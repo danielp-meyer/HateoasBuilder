@@ -25,4 +25,5 @@ jobs:
           version: 1.0.0
           project-path: Library/Library.csproj
           solution-path: Main.sln
+          nuget-feed-url: https://api.nuget.org/v3/index.json
           nuget-feed-password: ${{ secrets.NUGETDEPLOY }}
