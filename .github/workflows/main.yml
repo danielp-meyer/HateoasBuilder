@@ -23,6 +23,6 @@ jobs:
         uses: wahinekai/actions-publish-nuget@v3.0.1
         with:
           version: 1.0.0
-          project-path: Test/Library.csproj
+          project-path: Library/Library.csproj
           solution-path: Main.sln
           nuget-feed-password: ${{ secrets.NUGETDEPLOY }}
