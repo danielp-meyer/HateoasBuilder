@@ -8,6 +8,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{EFEEB541-7FE5-4020-8BE3-93BB7EA7308B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C278FE0E-9708-4282-85E2-27EF16BD27FA}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\main.yml = .github\workflows\main.yml
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSample", "WebSample\WebSample.csproj", "{6886F00F-34F8-495D-9850-8A50EF975A50}"
 EndProject
