@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -8,7 +8,7 @@
     <PackageId>MeyerCorp.HateoasBuilder</PackageId>
     <Version>1.0.0-preview-1</Version>
     <Authors>danielpmeyer</Authors>
-    <Company>Meyer Corporation</Company>
+    <Company>MeyerCorporation</Company>
     <Description>Extension based builder for creating HATEOAS links in RESTful reponses in .NET.</Description>
     <Copyright>2023, Meyer Corporation</Copyright>
     <PackageProjectUrl>https://github.com/MeyerCorporation/HateoasBuilder</PackageProjectUrl>
@@ -21,7 +21,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>.NET Standard Library allowing convenient creation of HATEOAS for REST API models</Title>
+    <Title>HATEOAS Builder for .NET</Title>
   </PropertyGroup>
 
   <ItemGroup>
