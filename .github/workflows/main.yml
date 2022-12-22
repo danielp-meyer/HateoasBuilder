@@ -19,11 +19,30 @@ jobs:
         with:
           dotnet-version: "6.0"
 
-      - name: Build, Test, and Publish NuGet
-        uses: wahinekai/actions-publish-nuget@v3.0.1
+      - name: Build DotNet
+        # You may pin to the exact commit or the version.
+        # uses: Elskom/build-dotnet@54d97a0f7d5d5ca946404976db00d27386b09254
+        uses: Elskom/build-dotnet@v1.1.1
         with:
-          version: 1.0.0
-          project-path: Library/Library.csproj
-          solution-path: Main.sln
-          nuget-feed-url: https://api.nuget.org/v3/index.json
-          nuget-feed-password: ${{ secrets.NUGETDEPLOY }}
+          # Filepath of the solution of which contains all the projects to be built, optionally tested and packed, relative to root of repository
+          SOLUTION_FILE_PATH: ./Library
+          # Flag to toggle running unit tests for the projects built, disabled by default
+          TEST: true
+          # Flag to toggle packing the projects built
+          PACK: true
+    
+      - name: NuGet push
+        # You may pin to the exact commit or the version.
+        # uses: edumserrano/nuget-push@b51b6fd4ba089731574dc4a642c6da356c8f8447
+        uses: edumserrano/nuget-push@v1.2.0
+        with:
+          # The API key for the NuGet server. Used when pushing the NuGet packages and symbols.
+          api-key: ${{ secrets.NUGETDEPLOY }}
+          # Indicates whether this actions should fail if the NuGet package being pushed already exists. Defaults to false.
+          #fail-if-exists: # optional, default is false
+          # The directory that will be used to push NuGet packages. It will push all NuGet packages (*.nupkg) and corresponding symbol packages (*.snupkg) present in the directory.
+          #working-directory: # optional
+          # The filepath for the NuGet package to be pushed.
+          #nuget-package: # optional
+          # The filepath for the symbols package to be pushed.
+          #symbols-package: # optional
