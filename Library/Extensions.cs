@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace MeyerCorp.HateoasBuilder
 {
     public static class Extensions
     {
-        public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? relPathFormat, params object[] formatItems)
+        public static LinkBuilder AddFormattedLink(this HttpContext httpContext, string relLabel, string? relPathFormat, params object[] formatItems)
         {
             if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
 
@@ -15,37 +17,77 @@ namespace MeyerCorp.HateoasBuilder
             var baseurl = $"{request.Scheme}://{request.Host}/";
 
 
-            return baseurl.AddLink(relLabel, relPathFormat, formatItems);
+            return baseurl.AddFormattedLink(relLabel, relPathFormat, formatItems);
         }
 
-        //public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? relPathFormat, params object[] formatItems)
-        //{
-        //    if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("A link type label must be set.", nameof(relLabel));
-        //    if (String.IsNullOrWhiteSpace(relPath)) throw new ArgumentException("A link path must be set.", nameof(relPathFormat));
+        public static LinkBuilder AddQueryLink(this HttpContext httpContext, string relLabel, params object[] queryPairs)
+        {
+            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
 
-        //    return httpContext
-        //            .Request
-        //            .PathBase
-        //            .Value
-        //            .AddLink(relLabel, relPathFormat, formatItems);
-        //}
+            var request = httpContext.Request;
+            var baseurl = $"{request.Scheme}://{request.Host}/";
 
-        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string? relPathFormat, params object[] formatItems)
+            var relPathFormat = new StringBuilder();
+
+            relPathFormat.Append(baseurl);
+            relPathFormat.Append('?');
+
+            for (var index = 0; index < queryPairs.Length; index += 2)
+            {
+                relPathFormat.Append($"{queryPairs[index].ToString().Trim()}={queryPairs[index + 1].ToString().Trim()}");
+            }
+
+            return baseurl.AddFormattedLink(relLabel, relPathFormat.ToString());
+        }
+
+        public static LinkBuilder AddRouteLink(this HttpContext httpContext, string relLabel, params object[] routeItems)
+        {
+            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+
+            var request = httpContext.Request;
+            var baseurl = $"{request.Scheme}://{request.Host}/";
+
+            foreach (var item in routeItems)
+            {
+                baseurl = Path.Combine(baseurl, item.ToString().Trim());
+            }
+
+            return httpContext.AddLink(relLabel, baseurl);
+        }
+
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string relativeUrl)
+        {
+            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+            if (String.IsNullOrWhiteSpace(relativeUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relativeUrl));
+
+            var output = httpContext.AddFormattedLink(relLabel, "{0}", relativeUrl);
+
+            return output;
+        }
+
+        public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string? relPathFormat, params object[] formatItems)
         {
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
 
             var output = new LinkBuilder(baseUrl);
 
-            return output.AddLink(relLabel, relPathFormat, formatItems);
+            return output.AddFormattedLink(relLabel, relPathFormat, formatItems);
         }
 
-        public static LinkBuilder AddLinks(this string baseUrl, string rel, string format, IEnumerable<string> items)
+        public static LinkBuilder AddFormattedLinks(this string baseUrl, string rel, string format, IEnumerable<string> items)
         {
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
 
             var output = new LinkBuilder(baseUrl);
 
-            return output.AddLinks(rel, format, items);
+            return output.AddFormattedLinks(rel, format, items);
         }
 
         public static string ToSelfHref(this IEnumerable<Link> links)

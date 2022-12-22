@@ -28,7 +28,7 @@ namespace MeyerCorp.HateoasBuilder
         /// <param name="index">Index which to retrieve.</param>
         /// <returns>Link object in the collection to return</returns>
         [JsonProperty]
-        public Link this[int index] { get { return GetLinks().ToArray()[index]; } }
+        public Link this[int index] { get { return Build().ToArray()[index]; } }
 
         /// <summary>
         /// The base URL which all presented links will use
@@ -74,7 +74,7 @@ namespace MeyerCorp.HateoasBuilder
         /// <param name="formatItems"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public LinkBuilder AddLink(string? relLabel, string? relPathFormat, params object[] formatItems)
+        public LinkBuilder AddFormattedLink(string? relLabel, string? relPathFormat, params object[] formatItems)
         {
             if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentNullException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
             if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentNullException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
@@ -93,15 +93,15 @@ namespace MeyerCorp.HateoasBuilder
             return this;
         }
 
-        public LinkBuilder AddLinkIf(bool condition, string? relLabel, string? relPathFormat, params object[] formatItems)
+        public LinkBuilder AddFormattedLinkIf(bool condition, string? relLabel, string? relPathFormat, params object[] formatItems)
         {
             if (condition)
-                AddLink(relLabel, relPathFormat, formatItems);
+                AddFormattedLink(relLabel, relPathFormat, formatItems);
 
             return this;
         }
 
-        public LinkBuilder AddLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
+        public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
         {
             if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)
             {
@@ -109,14 +109,14 @@ namespace MeyerCorp.HateoasBuilder
                 {
                     var formatitems = item.Split(',');
 
-                    AddLink(relLabel, relPathFormat, formatitems);
+                    AddFormattedLink(relLabel, relPathFormat, formatitems);
                 }
             }
 
             return this;
         }
 
-        public IEnumerable<Link> GetLinks()
+        public IEnumerable<Link> Build()
         {
             var output = new List<Link>();
 

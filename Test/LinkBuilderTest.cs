@@ -29,7 +29,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var test = new LinkBuilder("https:meyerus.com");
 
-            var caught = Assert.Throws<ArgumentNullException>(() => test.AddLink(relLabel, relPathFormat, formatItems));
+            var caught = Assert.Throws<ArgumentNullException>(() => test.AddFormattedLink(relLabel, relPathFormat, formatItems));
 
             Assert.Equal(message, caught.Message);
         }
@@ -43,8 +43,8 @@ namespace MeyerCorp.HateoasBuilder.Test
             const string rel = "rel";
             var test = new LinkBuilder("http://foo.bar");
 
-            test.AddLink(rel, format, items.ToArray());
-            Assert.Single(test.GetLinks());
+            test.AddFormattedLink(rel, format, items.ToArray());
+            Assert.Single(test.Build());
             Assert.Equal(new Link
             {
                 Href = result,

@@ -24,13 +24,13 @@ namespace WebSample.Controllers
         {
             return new
             {
-                Links = HttpContext.AddLink("self", "WeatherForecast").GetLinks(),
+                Links = HttpContext.AddFormattedLink("self", "WeatherForecast").Build(),
                 Results = Enumerable.Range(1, 6).Select(index => new WeatherForecast
                 {
                     Date = DateTime.Now.AddDays(index),
                     TemperatureC = Random.Shared.Next(-20, 55),
                     Summary = Summaries[Random.Shared.Next(Summaries.Length)],
-                    Links = HttpContext.AddLink("self", "WeatherForecast/{0}", index).GetLinks(),
+                    Links = HttpContext.AddFormattedLink("self", "WeatherForecast/{0}", index).Build(),
                 })
                 .ToArray()
             };
@@ -45,10 +45,10 @@ namespace WebSample.Controllers
             return new
             {
                 Links = HttpContext
-                    .AddLink("self", $"WeatherForecast?page={page}")
-                    .AddLinkIf(page - 1 > -1, "previous", "WeatherForecast?page={0}", page - 1)
-                    .AddLinkIf(page < pagecount, "next", "WeatherForecast?page={0}", page + 1)
-                    .GetLinks(),
+                    .AddFormattedLink("self", $"WeatherForecast?page={page}")
+                    .AddFormattedLinkIf(page - 1 > -1, "previous", "WeatherForecast?page={0}", page - 1)
+                    .AddFormattedLinkIf(page < pagecount, "next", "WeatherForecast?page={0}", page + 1)
+                    .Build(),
                 Results = Enumerable
                     .Range(1, 6)
                     .Skip(page)
@@ -58,7 +58,7 @@ namespace WebSample.Controllers
                         Date = DateTime.Now.AddDays(index),
                         TemperatureC = Random.Shared.Next(-20, 55),
                         Summary = Summaries[Random.Shared.Next(Summaries.Length)],
-                        Links = HttpContext.AddLink("self", "WeatherForecast/{0}", index).GetLinks(),
+                        Links = HttpContext.AddFormattedLink("self", "WeatherForecast/{0}", index).Build(),
                     })
                 .ToArray()
             };
@@ -73,11 +73,11 @@ namespace WebSample.Controllers
                 TemperatureC = Random.Shared.Next(-20, 55),
                 Summary = Summaries[id],
                 Links = HttpContext
-                    .AddLink("self", "WeatherForecast/{0}", id)
-                    .AddLink("detail", "WeatherForecast/{0}/detail/{1}?param={2}", id, "x0x0x0", "value")
+                    .AddFormattedLink("self", "WeatherForecast/{0}", id)
+                    .AddFormattedLink("detail", "WeatherForecast/{0}/detail/{1}?param={2}", id, "x0x0x0", "value")
                     .AddLinkExternal("http://meyer.com", "external", String.Empty)
                     .AddLinkExternal("http://meyer.com", "externaldetail", "products/accent-nonstick-frypan")
-                    .GetLinks(),
+                    .Build(),
             };
         }
     }
