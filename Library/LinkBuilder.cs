@@ -134,6 +134,10 @@ namespace MeyerCorp.HateoasBuilder
             return this;
         }
 
+        /// <summary>
+        /// Build all added links and yield as a collection of links.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty or whitespace.</exception>
         public IEnumerable<Link> Build()
         {
             var output = new List<Link>();
@@ -142,8 +146,8 @@ namespace MeyerCorp.HateoasBuilder
             {
                 output.Add(new Link
                 {
-                    Rel = RelHrefPairs[index],
-                    Href = String.Concat(RelHrefPairs[index + 1].ToString()),
+                    Rel = RelHrefPairs[index].Trim(),
+                    Href = String.Concat(RelHrefPairs[index + 1].ToString().Trim()),
                 });
             }
 
