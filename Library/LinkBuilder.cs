@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MeyerCorp.HateoasBuilder
 {
@@ -76,7 +77,6 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentNullException"></exception>
         public LinkBuilder AddFormattedLink(string? relLabel, string? relPathFormat, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentNullException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
             if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentNullException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
 
             if (formatItems.Length < 1 && !String.IsNullOrWhiteSpace(relPathFormat))
@@ -112,6 +112,24 @@ namespace MeyerCorp.HateoasBuilder
                     AddFormattedLink(relLabel, relPathFormat, formatitems);
                 }
             }
+
+            return this;
+        }
+
+        public LinkBuilder AddQueryLink(string relLabel, params object[] queryPairs)
+        {
+            var relPathFormat = new StringBuilder();
+
+            for (var index = 0; index < queryPairs.Length; index += 2)
+            {
+                relPathFormat.Append($"{queryPairs[index].ToString().Trim()}={queryPairs[index + 1]?.ToString().Trim()}&");
+            }
+
+            var queries = relPathFormat.ToString().Trim().Length > 0
+                ? relPathFormat.ToString().Trim('&')
+                : String.Empty;
+
+            AddFormattedLink(relLabel, "{0}", String.Concat(relLabel?.Trim(), '?', queries));
 
             return this;
         }

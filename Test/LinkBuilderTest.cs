@@ -51,5 +51,51 @@ namespace MeyerCorp.HateoasBuilder.Test
                 Rel = rel,
             }, test[0]);
         }
+
+        [Theory(DisplayName="AddQueryLink (pass)")]
+        [InlineData("http://foo.bar/base?value1=asdf&value2=0", "base", "value1", "asdf", "value2", 0)]
+        [InlineData("http://foo.bar/?value1=0&value2=2", "", "value1", 0, "value2", "2")]
+        [InlineData("http://foo.bar/?value1=0&value2=2", null, "value1", 0, "value2", "2")]
+        [InlineData("http://foo.bar/?value1=0&value2=2", "\t", "value1", 0, "value2", "2")]
+        // [InlineData("http://foo.bar/?value1=0&value2=2","base", "", 0, "value2", "2")]
+        // [InlineData("http://foo.bar/?value1=0&value2=2", "base",null, 0, "value2", "2")]
+        // [InlineData("http://foo.bar/?value1=0&value2=2", "base","\t", 0, "value2", "2")]
+        [InlineData("http://foo.bar/base?value1=&value2=2", "base", "value1", "", "value2", "2")]
+        [InlineData("http://foo.bar/base?value1=&value2=2", "base", "value1", null, "value2", "2")]
+        [InlineData("http://foo.bar/base?value1=&value2=2", "base", "value1", "\t", "value2", "2")]
+        [InlineData("http://foo.bar/base?value2=2&value1=", "base", "value2", "2", "value1", "")]
+        [InlineData("http://foo.bar/base?value2=2&value1=", "base", "value2", "2", "value1", null)]
+        [InlineData("http://foo.bar/base?value2=2&value1=", "base", "value2", "2", "value1", "\t")]
+        public void LinkBuilder3Test(string result, string baseUrl, string name1, object value1, string name2, object value2)
+        {
+            var test = new LinkBuilder("http://foo.bar");
+
+            var links = test.AddQueryLink(baseUrl, name1, value1, name2, value2).Build();
+
+            Assert.Equal(result, links.First().Href);
+        }
+
+        [Theory(DisplayName="AddQueryLink (fail)")]
+        [InlineData("http://foo.bar/base?value1=asdf&value2=0", "base", "value1", "asdf", "value2", 0)]
+        [InlineData("http://foo.bar/?value1=0&value2=2", "", "value1", 0, "value2", "2")]
+        [InlineData("http://foo.bar/?value1=0&value2=2", null, "value1", 0, "value2", "2")]
+        [InlineData("http://foo.bar/?value1=0&value2=2", "\t", "value1", 0, "value2", "2")]
+        // [InlineData("http://foo.bar/?value1=0&value2=2","base", "", 0, "value2", "2")]
+        // [InlineData("http://foo.bar/?value1=0&value2=2", "base",null, 0, "value2", "2")]
+        // [InlineData("http://foo.bar/?value1=0&value2=2", "base","\t", 0, "value2", "2")]
+        [InlineData("http://foo.bar/base?value1=&value2=2", "base", "value1", "", "value2", "2")]
+        [InlineData("http://foo.bar/base?value1=&value2=2", "base", "value1", null, "value2", "2")]
+        [InlineData("http://foo.bar/base?value1=&value2=2", "base", "value1", "\t", "value2", "2")]
+        [InlineData("http://foo.bar/base?value2=2&value1=", "base", "value2", "2", "value1", "")]
+        [InlineData("http://foo.bar/base?value2=2&value1=", "base", "value2", "2", "value1", null)]
+        [InlineData("http://foo.bar/base?value2=2&value1=", "base", "value2", "2", "value1", "\t")]
+        public void LinkBuilder4Test(string result, string baseUrl, string name1, object value1, string name2, object value2)
+        {
+            var test = new LinkBuilder("http://foo.bar");
+
+            var links = test.AddQueryLink(baseUrl, name1, value1, name2, value2).Build();
+
+            Assert.Equal(result, links.First().Href);
+        }
     }
 }
