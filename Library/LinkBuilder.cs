@@ -59,7 +59,7 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentException"><paramref name="relPathFormat"/> can be null, empty or whitespace only when the <paramref name="formatItems"/>parameter is empty</exception>
         public LinkBuilder AddLinkExternal(string baseUrl, string relLabel, string relPathFormat, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentNullException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
             if (formatItems.Length > 0 && String.IsNullOrWhiteSpace(relPathFormat))
                 throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
 
@@ -70,16 +70,17 @@ namespace MeyerCorp.HateoasBuilder
         }
 
         /// <summary>
-        /// 
+        /// Add a link based on a format string and necessary parameters
         /// </summary>
         /// <param name="relLabel"></param>
         /// <param name="relPathFormat"></param>
         /// <param name="formatItems"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public LinkBuilder AddFormattedLink(string? relLabel, string? relPathFormat, params object[] formatItems)
+        public LinkBuilder AddFormattedLink(string relLabel, string? relPathFormat="", params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentNullException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
 
             if (formatItems.Length < 1 && !String.IsNullOrWhiteSpace(relPathFormat))
             {
@@ -95,8 +96,11 @@ namespace MeyerCorp.HateoasBuilder
             return this;
         }
 
-        public LinkBuilder AddFormattedLinkIf(bool condition, string? relLabel, string? relPathFormat, params object[] formatItems)
+        public LinkBuilder AddFormattedLinkIf(bool condition, string relLabel, string relPathFormat, params object[] formatItems)
         {
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
+
             if (condition)
                 AddFormattedLink(relLabel, relPathFormat, formatItems);
 
@@ -105,6 +109,10 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
         {
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
+            if (items == null) throw new ArgumentNullException(nameof(relPathFormat));
+
             if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)
             {
                 foreach (var item in items.Where(i => i != null && !String.IsNullOrWhiteSpace(i.ToString())))
@@ -115,26 +123,6 @@ namespace MeyerCorp.HateoasBuilder
                 }
             }
 
-            return this;
-        }
-
-        public LinkBuilder AddQueryParameters(params object[] nameValueItems)
-        {
-            return this;
-        }
-
-        public LinkBuilder AddRoute(params object[] nameValueItems)
-        {
-            return this;
-        }
-
-        public LinkBuilder AddQueryParameters(params object[] nameValueItems)
-        {
-            return this;
-        }
-
-        public LinkBuilder AddRoute(params object[] nameValueItems)
-        {
             return this;
         }
 
@@ -157,19 +145,47 @@ namespace MeyerCorp.HateoasBuilder
         }
 
         /// <summary>
+        /// Add a list of parameters to the end of the last URL added to the list of links.
+        /// </summary>
+        public LinkBuilder AddParameters(params object[] queryPairs)
+        {
+            var relPathFormat = new StringBuilder();
+
+            for (var index = 0; index < queryPairs.Length; index += 2)
+            {
+                relPathFormat.Append($"{queryPairs[index].ToString().Trim()}={queryPairs[index + 1]?.ToString().Trim()}&");
+            }
+
+            var queries = relPathFormat.ToString().Trim().Length > 0
+                ? relPathFormat.ToString().Trim('&')
+                : String.Empty;
+
+            if (RelHrefPairs.Count < 1)
+                throw new InvalidOperationException("At least one link must be added before query parameters can be added.");
+            else
+                RelHrefPairs[RelHrefPairs.Count] = String.Concat(RelHrefPairs.Last(), '?', queries);
+
+            return this;
+        }
+
+        /// <summary>
         /// Build all added links and yield as a collection of links.
         /// </summary>
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty or whitespace.</exception>
-        public IEnumerable<Link> Build()
+        public IEnumerable<Link> Build(bool encode = false)
         {
             var output = new List<Link>();
 
             for (var index = 0; index < RelHrefPairs.Count - 1; index += 2)
             {
+                var href = String.Concat(RelHrefPairs[index + 1].ToString().Trim());
+
                 output.Add(new Link
                 {
                     Rel = RelHrefPairs[index].Trim(),
-                    Href = String.Concat(RelHrefPairs[index + 1].ToString().Trim()),
+                    Href = encode
+                    ? System.Web.HttpUtility.UrlEncode(href)
+                    : href,
                 });
             }
 

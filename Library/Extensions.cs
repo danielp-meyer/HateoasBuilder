@@ -9,7 +9,7 @@ namespace MeyerCorp.HateoasBuilder
 {
     public static class Extensions
     {
-        public static LinkBuilder AddFormattedLink(this HttpContext httpContext, string relLabel, string? relPathFormat, params object[] formatItems)
+        public static LinkBuilder AddFormattedLink(this HttpContext httpContext, string relLabel, string? relPathFormat = "", params object[] formatItems)
         {
             if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
 
@@ -72,7 +72,7 @@ namespace MeyerCorp.HateoasBuilder
             return output;
         }
 
-        public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string? relPathFormat, params object[] formatItems)
+        public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string? relPathFormat = "", params object[] formatItems)
         {
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
 

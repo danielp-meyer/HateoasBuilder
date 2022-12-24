@@ -96,7 +96,8 @@ public object GetAll()
            
             // Here we use a format string to create our link
             // http://base.url/WeatherForecast/1
-            Links = HttpContext.AddFormattedLink("self", "WeatherForecast/{0}", index).Build(),
+            Links = HttpContext.AddFormattedLink("self", "WeatherForecast/{0}", index)
+            .Build(),
         })
         .ToArray()
     };
@@ -107,7 +108,7 @@ By using the extension method for the `HttpContext`, the link builder is able to
 
 ## Methods
 
-Various methods allow convenient creation of links. They are all methods of the LinkBuilder class as well as complimentary extension methods that allow initializing the LinkBuilder object starting with a base URL string or the HttpContext property of a Web API controller.
+Various methods allow convenient creation of links. They are all methods of the LinkBuilder class as well as complimentary extension methods that allow initializing the LinkBuilder object starting with a base URL string or the `HttpContext` property of a Web API controller.
 
 ### AddLink
 
@@ -143,67 +144,49 @@ this.HttpContext
 
 `AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
 
-#### Example
+#### AddQueryLink Example
 
 ```C#
 "https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
 
 // or
 this.HttpContext
-    .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .AddRouteLink("locations", "id", 2, "address") //https://foobar/employees/id/2/address
-    .AddRouteLink("products", "id", 3, "price"); //https://foobar/employees/id/3/price
+    .AddRouteLink("employees", "id", 1, "dateOfHire", "wednesday") //https://foobar/employees?id=1&dateOfHire=wednesday
+    .AddRouteLink("locations", "id", 2, "address", "95687") //https://foobar/locations?id=2&address=95687
+    .AddRouteLink("products", "id", 3, "price", "100") //https://foobar/products?id=3&price=100
+    .AddRouteLink("products", "id", null, "price", "100"); //https://foobar/products?id=&price=100
 ```
 
 ### AddFormattedLink(s)
 
-`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
+`AddFormattedLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and format your URL as you like as if you were using `String.Format()`.
 
-#### Example
-
-```C#
-"https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
-
-// or
-this.HttpContext
-    .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .AddRouteLink("locations", "id", 2, "address") //https://foobar/employees/id/2/address
-    .AddRouteLink("products", "id", 3, "price"); //https://foobar/employees/id/3/price
-```
-
-### AddRoutes
-
-`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
-
-#### Example
+#### AddFormattedLink Example
 
 ```C#
-"https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
-
-// or
 this.HttpContext
-    .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .AddRouteLink("locations", "id", 2, "address") //https://foobar/employees/id/2/address
-    .AddRouteLink("products", "id", 3, "price"); //https://foobar/employees/id/3/price
+    .AddRouteLink("{0}/{1}/{2}?{3}={4}"employees", "id", 1, "dateOfHire", "wednesday") //https://foobar/employees/id/1?dateOfHire=wednesday
+    .AddRouteLink("locations", "id", 2, "address") //https://foobar/locations/id/2/address
+    .AddRouteLink("products", "id", 3, "price"); //https://foobar/products/id/3/price
 ```
 
-### Build()
+### Build
 
 `Build` is always the final call in the chain and returns the the links/name pairs as a collection which can be added to your returned data object. The `Link` objects will serialize to JSON automatically. XML is not officially supported at this time.
 
-#### Example
+#### Build Example
 
 ```C#
 this.HttpContext
     .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .Build(); //[ https://foobar/employees/id/3/price ... ]
+    .Build(encode: false); //[ https://foobar/employees/id/3/price ... ]
 ```
 
 ### AddParameters
 
-`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that. The `AddParameters` method will only work after the `Add**Link` methods adding parameters to that link it follows. Do not chain `AddParameters` methods.
+`AddParameters` allows you to add any number of query parameters to the end of the last link that it is run from. The parameters are added as pairs of parameters in the .NET method with each pair representing a parameter name, then value `("name", "value", "name1", "value1")` which yields `?name=value&name1=value1`. The `AddParameters` method will only work after the `Add**Link` methods adding the parameters to that link it follows. Do not chain the `AddParameters` method.
 
-#### Example
+#### AddParameters Example
 
 ```C#
 this.HttpContext
@@ -212,9 +195,11 @@ this.HttpContext
     .Build(); //Yields: https://foobar/employees/id/1/dateOfHire?location=1&address=2
 ```
 
-
 ## Glossary
 
 * REST: [**RE**presentational **S**tate **T**ransfer](https://restfulapi.net/)
 * SPA: A **S**ingle **P**age **A**pplication is a SaaS application where the application goes back to the server for only data from an API. THe webpages are created by the code in the application typically by manipulation of the HTML DOM.
-* 
+
+## References
+
+* HATEOAS: [HATEOAS Driven REST APIs](https://restfulapi.net/hateoas/)

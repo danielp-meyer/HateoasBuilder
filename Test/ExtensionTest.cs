@@ -43,7 +43,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         [InlineData("https://foo.bar/dingleball", "dingle{0}", new object[] { "ball" })]
         [InlineData("https://foo.bar/dingleballdingle", "dingle{0}{1}", new object[] { "ball", "dingle" })]
         [InlineData("https://foo.bar/dingleballdingle2", "dingle{0}{1}{2}", new object[] { "ball", "dingle", 2 })]
-        public void AddLinkTest3(string result, string? relPathFormat, object[] items)
+        public void AddLinkTest3(string result, string relPathFormat, object[] items)
         {
             const string relLabel = "rel";
 
@@ -111,7 +111,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             const string relLabel = "rel";
 
-            var caught = Assert.Throws<ArgumentException>(() => baseUrl.AddFormattedLink(relLabel, relPathFormat, items));
+            var caught = Assert.Throws<ArgumentException>(() => baseUrl?.AddFormattedLink(relLabel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
         }
@@ -124,7 +124,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             const string relLabel = "rel";
 
-            var caught = Assert.Throws<ArgumentNullException>(() => baseUrl.AddFormattedLink(relLabel, relPathFormat, items));
+            var caught = Assert.Throws<ArgumentNullException>(() => baseUrl?.AddFormattedLink(relLabel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
         }

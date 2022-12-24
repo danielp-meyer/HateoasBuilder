@@ -25,6 +25,7 @@ namespace MeyerCorp.HateoasBuilder.Test
 
         public override WebSocketManager WebSockets => throw new NotImplementedException();
 
+        [Obsolete]
         public override AuthenticationManager Authentication => throw new NotImplementedException();
 
         public override ClaimsPrincipal User { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
