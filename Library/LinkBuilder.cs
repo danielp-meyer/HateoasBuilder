@@ -59,7 +59,7 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentException"><paramref name="relPathFormat"/> can be null, empty or whitespace only when the <paramref name="formatItems"/>parameter is empty</exception>
         public LinkBuilder AddLinkExternal(string baseUrl, string relLabel, string relPathFormat, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
             if (formatItems.Length > 0 && String.IsNullOrWhiteSpace(relPathFormat))
                 throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
 
@@ -77,10 +77,10 @@ namespace MeyerCorp.HateoasBuilder
         /// <param name="formatItems"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public LinkBuilder AddFormattedLink(string relLabel, string? relPathFormat="", params object[] formatItems)
+        public LinkBuilder AddFormattedLink(string relLabel, string? relPathFormat = "", params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
-            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
+            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relPathFormat));
 
             if (formatItems.Length < 1 && !String.IsNullOrWhiteSpace(relPathFormat))
             {
@@ -98,8 +98,8 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddFormattedLinkIf(bool condition, string relLabel, string relPathFormat, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
-            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
+            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
 
             if (condition)
                 AddFormattedLink(relLabel, relPathFormat, formatItems);
@@ -109,8 +109,8 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
-            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
+            if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relPathFormat));
             if (items == null) throw new ArgumentNullException(nameof(relPathFormat));
 
             if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)

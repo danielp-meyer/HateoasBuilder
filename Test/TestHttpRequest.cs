@@ -10,9 +10,9 @@ namespace MeyerCorp.HateoasBuilder.Test
         public override HttpContext HttpContext => throw new System.NotImplementedException();
 
         public override string Method { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public override string? Scheme { get ; set; }
+        public override string? Scheme { get; set; }
         public override bool IsHttps { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-        public override HostString Host { get; set ; }
+        public override HostString Host { get; set; }
         public override PathString PathBase { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
         public override PathString Path { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
         public override QueryString QueryString { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }

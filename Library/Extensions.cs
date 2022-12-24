@@ -75,6 +75,7 @@ namespace MeyerCorp.HateoasBuilder
         public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string? relPathFormat = "", params object[] formatItems)
         {
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
 
             var output = new LinkBuilder(baseUrl);
 

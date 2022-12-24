@@ -52,7 +52,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             }, test[0]);
         }
 
-        [Theory(DisplayName="AddQueryLink (pass)")]
+        [Theory(DisplayName = "AddQueryLink (pass)")]
         [InlineData("http://foo.bar/base?value1=asdf&value2=0", "base", "value1", "asdf", "value2", 0)]
         // [InlineData("http://foo.bar/?value1=0&value2=2", "", "value1", 0, "value2", "2")]
         // [InlineData("http://foo.bar/?value1=0&value2=2", null, "value1", 0, "value2", "2")]

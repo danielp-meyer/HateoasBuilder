@@ -20,7 +20,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal("https://foo.bar/dingle/ball?value1=1&value2=2", links.First().Href);
         }
 
-        [Theory(DisplayName = "AddLink (fail)")]
+        [Theory(DisplayName = "HttpContext.AddLink (fail)")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", "", "dingle/ball?value1=1&value2=2")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", "rel", "")]
         public void AddLinkTest1(string result, string label, string relativeUrl)
@@ -62,7 +62,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             }, linkbuilder.Build().First());
         }
 
-        [Theory(DisplayName = "HttpClient.AddLink (fail).")]
+        [Theory(DisplayName = "HttpContext.AddLink (fail).")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
@@ -76,7 +76,7 @@ namespace MeyerCorp.HateoasBuilder.Test
                 Host = new HostString("foo.bar"),
             });
 
-            var caught = Assert.Throws<ArgumentNullException>(() => http.AddFormattedLink(relLabel, relPathFormat, items));
+            var caught = Assert.Throws<ArgumentException>(() => http.AddFormattedLink(relLabel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
         }
@@ -103,7 +103,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(expected.Rel, output.Rel);
         }
 
-        [Theory(DisplayName = "BaseUrl.AddLink (fail).")]
+        [Theory(DisplayName = "BaseUrl.AddLink (fail 1).")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "", "relPathFormat", new object[] { "ball" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", null, "relPathFormat", new object[] { "ball", "dingle" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "\t", "relPathFormat", new object[] { "ball", "dingle", 2 })]
@@ -111,12 +111,12 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             const string relLabel = "rel";
 
-            var caught = Assert.Throws<ArgumentException>(() => baseUrl?.AddFormattedLink(relLabel, relPathFormat, items));
+            var caught = Assert.Throws<ArgumentException>(() => baseUrl.AddFormattedLink(relLabel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
         }
 
-        [Theory(DisplayName = "BaseUrl.AddLink (fail2).")]
+        [Theory(DisplayName = "BaseUrl.AddLink (fail 2).")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", "", new object[] { "ball" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", null, new object[] { "ball", "dingle" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", "\t", new object[] { "ball", "dingle", 2 })]
@@ -124,7 +124,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             const string relLabel = "rel";
 
-            var caught = Assert.Throws<ArgumentNullException>(() => baseUrl?.AddFormattedLink(relLabel, relPathFormat, items));
+            var caught = Assert.Throws<ArgumentException>(() => baseUrl.AddFormattedLink(relLabel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
         }
