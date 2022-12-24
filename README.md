@@ -6,7 +6,7 @@ A .NET Standard Library allowing convenient creation of HATEOAS for REST API mod
 
 HATEOAS or Hypermedia as the Engine of Application State is a helpful feature of REST and one many consider necessary to implement REST propertly. It can be often overlooked by backend developers as not critical but is very helpful to SPA development as API responses will contain predictable object schemas with URLs that can be used in pages of the SPA and linked pages ad infinitum.
 
-In the following #### Example, data is returned as an array of items. Each item has a description as well as an array of links. Only one links is necessary to inform the consumer that where the details for each item can be found. Then there is an array of links describing how to retrieve the previous page or data, the next page, and this page.
+In the following example, data is returned as an array of items. Each item has a description as well as an array of links. In this case, only one link is necessary to inform the consumer where the details for each item can be found. There is an array of links describing how to retrieve the previous page or data, the next page, and this page which is helpful for paginated data.
 
 ```JSON
 {
@@ -187,39 +187,34 @@ this.HttpContext
     .AddRouteLink("products", "id", 3, "price"); //https://foobar/employees/id/3/price
 ```
 
-### AddParameters
-
-`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
-
-#### Example
-
-```C#
-"https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
-
-// or
-this.HttpContext
-    .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .AddRouteLink("locations", "id", 2, "address") //https://foobar/employees/id/2/address
-    .AddRouteLink("products", "id", 3, "price"); //https://foobar/employees/id/3/price
-```
-
 ### Build()
 
-`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
+`Build` is always the final call in the chain and returns the the links/name pairs as a collection which can be added to your returned data object. The `Link` objects will serialize to JSON automatically. XML is not officially supported at this time.
 
 #### Example
 
 ```C#
-"https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
-
-// or
 this.HttpContext
     .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .AddRouteLink("locations", "id", 2, "address") //https://foobar/employees/id/2/address
-    .AddRouteLink("products", "id", 3, "price"); //https://foobar/employees/id/3/price
+    .Build(); //[ https://foobar/employees/id/3/price ... ]
 ```
+
+### AddParameters
+
+`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that. The `AddParameters` method will only work after the `Add**Link` methods adding parameters to that link it follows. Do not chain `AddParameters` methods.
+
+#### Example
+
+```C#
+this.HttpContext
+    .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
+    .AddParameters("location", "1", "address",2 ) //?location=1&address=2
+    .Build(); //Yields: https://foobar/employees/id/1/dateOfHire?location=1&address=2
+```
+
 
 ## Glossary
 
-REST
-SPA
+* REST: [**RE**presentational **S**tate **T**ransfer](https://restfulapi.net/)
+* SPA: A **S**ingle **P**age **A**pplication is a SaaS application where the application goes back to the server for only data from an API. THe webpages are created by the code in the application typically by manipulation of the HTML DOM.
+* 
