@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MeyerCorp.HateoasBuilder
 {
@@ -78,7 +79,6 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentNullException"></exception>
         public LinkBuilder AddFormattedLink(string? relLabel, string? relPathFormat, params object[] formatItems)
         {
-            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentNullException(nameof(relLabel), "Parameter cannot be null, empty or whitespace.");
             if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentNullException(nameof(relPathFormat), "Parameter cannot be null, empty or whitespace.");
 
             if (formatItems.Length < 1 && !String.IsNullOrWhiteSpace(relPathFormat))
@@ -128,6 +128,38 @@ namespace MeyerCorp.HateoasBuilder
             return this;
         }
 
+        public LinkBuilder AddQueryParameters(params object[] nameValueItems)
+        {
+            return this;
+        }
+
+        public LinkBuilder AddRoute(params object[] nameValueItems)
+        {
+            return this;
+        }
+
+        public LinkBuilder AddQueryLink(string relLabel, params object[] queryPairs)
+        {
+            var relPathFormat = new StringBuilder();
+
+            for (var index = 0; index < queryPairs.Length; index += 2)
+            {
+                relPathFormat.Append($"{queryPairs[index].ToString().Trim()}={queryPairs[index + 1]?.ToString().Trim()}&");
+            }
+
+            var queries = relPathFormat.ToString().Trim().Length > 0
+                ? relPathFormat.ToString().Trim('&')
+                : String.Empty;
+
+            AddFormattedLink(relLabel, "{0}", String.Concat(relLabel?.Trim(), '?', queries));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Build all added links and yield as a collection of links.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty or whitespace.</exception>
         public IEnumerable<Link> Build()
         {
             var output = new List<Link>();
@@ -136,8 +168,8 @@ namespace MeyerCorp.HateoasBuilder
             {
                 output.Add(new Link
                 {
-                    Rel = RelHrefPairs[index],
-                    Href = String.Concat(RelHrefPairs[index + 1].ToString()),
+                    Rel = RelHrefPairs[index].Trim(),
+                    Href = String.Concat(RelHrefPairs[index + 1].ToString().Trim()),
                 });
             }
 
