@@ -22,6 +22,8 @@ namespace MeyerCorp.HateoasBuilder
                 BaseUrl = baseUrl;
         }
 
+
+
         /// <summary>
         /// Link colleciton indexer
         /// </summary>
@@ -113,6 +115,16 @@ namespace MeyerCorp.HateoasBuilder
                 }
             }
 
+            return this;
+        }
+
+        public LinkBuilder AddQueryParameters(params object[] nameValueItems)
+        {
+            return this;
+        }
+
+        public LinkBuilder AddRoute(params object[] nameValueItems)
+        {
             return this;
         }
 
