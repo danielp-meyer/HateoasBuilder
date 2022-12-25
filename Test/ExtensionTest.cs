@@ -8,11 +8,11 @@ namespace MeyerCorp.HateoasBuilder.Test
 {
     public class ExtensionTest
     {
-        const string rel = "rel";
-        const string baseUrl = "https://foo.bar";
+        protected const string rel = "rel";
+        protected const string baseUrl = "https://foo.bar";
 
 
-        static TestHttpContext GetHttpContext()
+        protected static TestHttpContext GetHttpContext()
         {
             return new TestHttpContext(new TestHttpRequest
             {

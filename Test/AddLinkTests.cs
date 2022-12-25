@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace MeyerCorp.HateoasBuilder.Test
 {
-    public class AddLinkTests:ExtensionTest
+    public class AddLinkTests : ExtensionTest
     {
         [Theory(DisplayName = "HttpContext.AddLink (pass)")]
         [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
@@ -65,3 +63,4 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(result, ex.Message);
         }
     }
+}
