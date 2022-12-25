@@ -9,23 +9,61 @@ namespace MeyerCorp.HateoasBuilder.Test
     public class ExtensionTest
     {
         const string rel = "rel";
+        const string baseUrl = "https://foo.bar";
 
-        [Fact(DisplayName = "AddLink (pass)")]
-        public void AddLinkTest0()
+        [Theory(DisplayName = "HttpContext.AddLink (pass)")]
+        [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
+        [InlineData("https://foo.bar/dingle", "dingle")]
+        public void AddLinkHttpContextPassTest(string result, string relativeUrl)
         {
             var links = GetHttpContext()
-                .AddLink(rel, "dingle/ball?value1=1&value2=2")
+                .AddLink(rel, relativeUrl)
                 .Build();
 
-            Assert.Equal("https://foo.bar/dingle/ball?value1=1&value2=2", links.First().Href);
+            Assert.Equal(result, links.First().Href);
+            Assert.Equal(rel, links.First().Rel);
+        }
+
+        [Theory(DisplayName = "String.AddLink (pass)")]
+        [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
+        [InlineData("https://foo.bar/dingle", "dingle")]
+        public void AddLinkStringPassTest(string result, string relativeUrl)
+        {
+            var links = baseUrl
+                .AddLink(rel, relativeUrl)
+                .Build();
+
+            Assert.Equal(result, links.First().Href);
+            Assert.Equal(rel, links.First().Rel);
         }
 
         [Theory(DisplayName = "HttpContext.AddLink (fail)")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", "", "dingle/ball?value1=1&value2=2")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", "rel", "")]
-        public void AddLinkTest1(string result, string label, string relativeUrl)
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", null, "dingle/ball?value1=1&value2=2")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", "", "dingle")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", "\t", "dingle")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", rel, null)]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", rel, "")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", rel, "\t")]
+        public void AddLinkHttpContextFailTest(string result, string rel, string relativeUrl)
         {
-            var ex = Assert.ThrowsAny<Exception>(() => GetHttpContext().AddLink(label, relativeUrl).Build());
+            var ex = Assert.Throws<ArgumentException>(() => GetHttpContext().AddLink(rel, relativeUrl));
+
+            Assert.Equal(result, ex.Message);
+        }
+
+        [Theory(DisplayName = "String.AddLink (fail)")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", null, rel, "dingle/ball?value1=1&value2=2")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "", rel, "dingle")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "\t", rel, "dingle")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", baseUrl, null, "dingle/ball?value1=1&value2=2")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", baseUrl, "", "dingle")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')", baseUrl, "\t", "dingle")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", baseUrl, rel, null)]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", baseUrl, rel, "")]
+        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relativeUrl')", baseUrl, rel, "\t")]
+        public void AddLinkStringFailTest(string result,string baseUrl, string label, string relativeUrl)
+        {
+            var ex = Assert.ThrowsAny<ArgumentException>(() => baseUrl.AddLink(label, relativeUrl));
 
             Assert.Equal(result, ex.Message);
         }
@@ -39,7 +77,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             });
         }
 
-        [Theory(DisplayName = "HttpClient.AddLink (pass).")]
+        [Theory(DisplayName = "HttpClient.AddLink (passx).")]
         [InlineData("https://foo.bar/dingleball", "dingle{0}", new object[] { "ball" })]
         [InlineData("https://foo.bar/dingleballdingle", "dingle{0}{1}", new object[] { "ball", "dingle" })]
         [InlineData("https://foo.bar/dingleballdingle2", "dingle{0}{1}{2}", new object[] { "ball", "dingle", 2 })]
@@ -62,7 +100,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             }, linkbuilder.Build().First());
         }
 
-        [Theory(DisplayName = "HttpContext.AddLink (fail).")]
+        [Theory(DisplayName = "HttpContext.AddLink (failx).")]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]

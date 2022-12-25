@@ -72,6 +72,24 @@ namespace MeyerCorp.HateoasBuilder
             return output;
         }
 
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string relativeUrl, bool encode=false)
+        {
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
+            if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
+            if (String.IsNullOrWhiteSpace(relativeUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relativeUrl));
+
+            var output = baseUrl.AddFormattedLink(relLabel, "{0}", relativeUrl);
+
+            return output;
+        }
+
         public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string? relPathFormat = "", params object[] formatItems)
         {
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
