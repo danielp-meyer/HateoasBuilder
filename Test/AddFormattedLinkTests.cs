@@ -25,9 +25,9 @@ namespace MeyerCorp.HateoasBuilder.Test
         }
 
         [Theory(DisplayName = "HttpContext.AddFormattedLink (fail).")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
+        [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
+        [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
+        [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
         public void AddFormattedLinkHttpContextFail(string result, string? relPathFormat, object[] items)
         {
             var caught = Assert.Throws<ArgumentException>(() => GetHttpContext().AddFormattedLink(rel, relPathFormat, items));
@@ -47,9 +47,9 @@ namespace MeyerCorp.HateoasBuilder.Test
         }
 
         [Theory(DisplayName = "String.AddFormattedLink (fail).")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
+        [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
+        [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
+        [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
         public void AddFormattedLinkStringFail(string result, string? relPathFormat, object[] items)
         {
             var caught = Assert.Throws<ArgumentException>(() => GetHttpContext().AddFormattedLink(rel, relPathFormat, items));

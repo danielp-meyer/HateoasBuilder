@@ -21,77 +21,25 @@ namespace MeyerCorp.HateoasBuilder.Test
             });
         }
 
-        [Theory(DisplayName = "HttpClient.AddLink (passx).")]
-        [InlineData("https://foo.bar/dingleball", "dingle{0}", new object[] { "ball" })]
-        [InlineData("https://foo.bar/dingleballdingle", "dingle{0}{1}", new object[] { "ball", "dingle" })]
-        [InlineData("https://foo.bar/dingleballdingle2", "dingle{0}{1}{2}", new object[] { "ball", "dingle", 2 })]
-        public void AddLinkTest3(string result, string relPathFormat, object[] items)
-        {
-            var linkbuilder = GetHttpContext().AddFormattedLink(rel, relPathFormat, items);
-
-            Assert.Equal(new Link(rel,result), linkbuilder.Build().First());
-        }
-
-        [Theory(DisplayName = "HttpContext.AddLink (failx).")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "", new object[] { "ball" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", null, new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
-        public void AddLinkTest4(string result, string? relPathFormat, object[] items)
-        {
-            var caught = Assert.Throws<ArgumentException>(() => GetHttpContext().AddFormattedLink(rel, relPathFormat, items));
-
-            Assert.Equal(result, caught.Message);
-        }
-
-
-        [Theory(DisplayName = "BaseUrl.AddLink (pass).")]
-        [InlineData("https://foo.bar/Dingle", "Dingle", new object[] { })]
-        [InlineData("https://foo.bar/DingleBall", "Dingle{0}", new object[] { "Ball" })]
-        [InlineData("https://foo.bar/DingleBalldingle", "Dingle{0}{1}", new object[] { "Ball", "dingle" })]
-        [InlineData("https://foo.bar/DingleBalldingle2", "Dingle{0}{1}{2}", new object[] { "Ball", "dingle", 2 })]
-        public void AddLinkTest5(string result, string? relPathFormat, object[] items)
-        {
-            const string relLabel = "rel";
-            const string baseUrl = "https://foo.bar";
-
-            var output = baseUrl.AddFormattedLink(relLabel, relPathFormat, items).Build().First();
-            var expected = new Link(rel,result);
-
-            Assert.Equal(expected.Href, output.Href);
-            Assert.Equal(expected.Rel, output.Rel);
-        }
-
-        [Theory(DisplayName = "BaseUrl.AddLink (fail 1).")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "", "relPathFormat", new object[] { "ball" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", null, "relPathFormat", new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'baseUrl')", "\t", "relPathFormat", new object[] { "ball", "dingle", 2 })]
-        public void AddLinkTest6(string result, string? baseUrl, string? relPathFormat, object[] items)
-        {
-            const string relLabel = "rel";
-
-            var caught = Assert.Throws<ArgumentException>(() => baseUrl.AddFormattedLink(relLabel, relPathFormat, items));
-
-            Assert.Equal(result, caught.Message);
-        }
-
-        [Theory(DisplayName = "BaseUrl.AddLink (fail 2).")]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", "", new object[] { "ball" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", null, new object[] { "ball", "dingle" })]
-        [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "https://foo.bar", "\t", new object[] { "ball", "dingle", 2 })]
-        public void AddLinkTest7(string result, string? baseUrl, string? relPathFormat, object[] items)
-        {
-            const string relLabel = "rel";
-
-            var caught = Assert.Throws<ArgumentException>(() => baseUrl.AddFormattedLink(relLabel, relPathFormat, items));
-
-            Assert.Equal(result, caught.Message);
-        }
-
         [Theory(DisplayName = "ToHrefTest (pass).")]
         [InlineData("href")]
         [InlineData("href2")]
         [InlineData("href1")]
-        public void ToHrefTest(string rel)
+        public void ToHrefTestPass(string rel)
+        {
+            var links = new List<Link>
+            {
+                new Link(rel+"x",rel),
+                new Link(rel,rel),
+                new Link(rel+"xx",rel)
+            };
+
+            Assert.Equal(rel, links.ToHref(rel));
+        }
+
+        [Theory(DisplayName = "ToHrefTest (fail).")]
+        [InlineData("href")]
+        public void ToHrefTestFail(string rel)
         {
             var links = new List<Link>
             {
@@ -100,7 +48,9 @@ namespace MeyerCorp.HateoasBuilder.Test
                 new Link(rel,rel)
             };
 
-            Assert.Equal(rel, links.ToHref(rel));
+            var ex = Assert.Throws<InvalidOperationException>(() => Assert.Equal(rel, links.ToHref(rel)));
+
+            Assert.Equal("Sequence contains more than one matching element", ex.Message);
         }
     }
 }

@@ -19,12 +19,12 @@ namespace MeyerCorp.HateoasBuilder.Test
         }
 
         [Theory(DisplayName = "Check null/empty parameters.")]
-        [InlineData(null, "asdf", new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')")]
-        [InlineData("asdf", null, new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
-        [InlineData("", "asdf", new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relLabel')")]
-        [InlineData("asdf", "", new object[] { "test" }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
-        [InlineData("asdf", null, new object[] { }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
-        [InlineData("asdf", "", new object[] { }, "Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData(null, "asdf", new object[] { "test" }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relLabel')")]
+        [InlineData("asdf", null, new object[] { "test" }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData("", "asdf", new object[] { "test" }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relLabel')")]
+        [InlineData("asdf", "", new object[] { "test" }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData("asdf", null, new object[] { }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')")]
+        [InlineData("asdf", "", new object[] { }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relPathFormat')")]
         public void LinkBuilder1Test(string? relLabel, string? relPathFormat, IEnumerable<object> formatItems, string message)
         {
             var test = new LinkBuilder("https:meyerus.com");
