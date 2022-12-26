@@ -6,7 +6,7 @@ namespace MeyerCorp.HateoasBuilder.Test
 {
     public class AddRouteLinkTests : ExtensionTest
     {
-        [Theory(DisplayName = "HttpClient.AddRouteLink (pass).")]
+        [Theory(DisplayName = "HttpContext.AddRouteLink (pass).")]
         [InlineData("https://foo.bar/relative/ball", new object[] { "relative", "ball" })]
         [InlineData("https://foo.bar/relative1/ball/dingle", new object[] { "relative1", "ball", "dingle" })]
         [InlineData("https://foo.bar/relative2/ball/dingle/2", new object[] { "relative2", "ball", "dingle", 2 })]

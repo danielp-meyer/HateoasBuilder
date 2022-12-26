@@ -6,7 +6,7 @@ namespace MeyerCorp.HateoasBuilder.Test
 {
     public class AddQueryLinkTests : ExtensionTest
     {
-        [Theory(DisplayName = "HttpClient.AddQueryLink (pass).")]
+        [Theory(DisplayName = "HttpContext.AddQueryLink (pass).")]
         [InlineData("https://foo.bar/?relative=ball", "relative1", null, new object[] { "relative", "ball" })]
         [InlineData("https://foo.bar/?relative1=ball&dingle=", "relative2", "", new object[] { "relative1", "ball", "dingle" })]
         [InlineData("https://foo.bar/?relative2=ball&dingle=2", "relative3", "\t", new object[] { "relative2", "ball", "dingle", 2 })]
