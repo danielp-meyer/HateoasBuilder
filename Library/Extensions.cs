@@ -9,12 +9,11 @@ namespace MeyerCorp.HateoasBuilder
 {
     public static class Extensions
     {
-        internal static void Add(this List<Tuple<string, string>> list, string relLabel, string rawRelativeUrl)
+        internal static void Add(this List<Tuple<string, string?>> list, string relLabel, string? rawRelativeUrl)
         {
             relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
-            rawRelativeUrl.CheckIfNullOrWhiteSpace(nameof(rawRelativeUrl));
 
-            list.Add(new Tuple<string, string>(relLabel.Trim(), rawRelativeUrl.Trim()));
+            list.Add(new Tuple<string, string?>(relLabel.Trim(), rawRelativeUrl?.Trim()));
         }
 
         /// <summary>
@@ -24,13 +23,12 @@ namespace MeyerCorp.HateoasBuilder
         /// <param name="relLabel">The label which will be used for the hyperlink.</param>
         /// <param name="rawRelativeUrl">The hypertext link indicating where more data can be found.</param>
         /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string rawRelativeUrl)
+        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string? rawRelativeUrl)
         {
             baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
             relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
-            rawRelativeUrl.CheckIfNullOrWhiteSpace(nameof(rawRelativeUrl));
 
-            return new LinkBuilder(baseUrl.Trim(), relLabel, rawRelativeUrl.Trim());
+            return new LinkBuilder(baseUrl.Trim(), relLabel, rawRelativeUrl?.Trim());
         }
 
         /// <summary>
@@ -40,12 +38,12 @@ namespace MeyerCorp.HateoasBuilder
         /// <param name="relLabel">The label which will be used for the hyperlink.</param>
         /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
         /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string rawRelativeUrl)
+        public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? rawRelativeUrl)
         {
             if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
 
             var request = httpContext.Request;
-            var baseurl = $"{request.Scheme}://{request.Host}/";
+            var baseurl = $"{request.Scheme}://{request.Host}";
 
             return baseurl.AddLink(relLabel, rawRelativeUrl);
         }
