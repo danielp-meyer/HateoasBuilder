@@ -42,17 +42,20 @@ namespace MeyerCorp.HateoasBuilder
 
         public static LinkBuilder AddRouteLink(this HttpContext httpContext, string relLabel, params object[] routeItems)
         {
-            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+            if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
 
-            var request = httpContext.Request;
-            var baseurl = $"{request.Scheme}://{request.Host}/";
+            var output = String.Join('/', routeItems.Select(ri => ri.ToString().Trim()));
 
-            foreach (var item in routeItems)
-            {
-                baseurl = Path.Combine(baseurl, item.ToString().Trim());
-            }
+            return httpContext.AddLink(relLabel, output);
+        }
 
-            return httpContext.AddLink(relLabel, baseurl);
+        public static LinkBuilder AddRouteLink(this string baseUrl, string relLabel, params object[] routeItems)
+        {
+            if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
+
+            var output = String.Join('/', routeItems.Select(ri => ri.ToString().Trim()));
+
+            return baseUrl.AddLink(relLabel, output);
         }
 
         /// <summary>
@@ -79,7 +82,7 @@ namespace MeyerCorp.HateoasBuilder
         /// <param name="relLabel">The label which will be used for the hyperlink.</param>
         /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
         /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string relativeUrl, bool encode=false)
+        public static LinkBuilder AddLink(this string baseUrl, string relLabel, string relativeUrl, bool encode = false)
         {
             if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
             if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
@@ -89,6 +92,17 @@ namespace MeyerCorp.HateoasBuilder
 
             return output;
         }
+
+        public static LinkBuilder AddRouteLink(this string baseUrl, string relLabel, string? relPathFormat = "", params object[] formatItems)
+        {
+            if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(baseUrl));
+            if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty or whitespace.", nameof(relLabel));
+
+            var output = new LinkBuilder(baseUrl);
+
+            return output.AddFormattedLink(relLabel, relPathFormat, formatItems);
+        }
+
 
         public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string? relPathFormat = "", params object[] formatItems)
         {

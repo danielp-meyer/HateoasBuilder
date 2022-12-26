@@ -27,20 +27,12 @@ namespace MeyerCorp.HateoasBuilder.Test
         [InlineData("https://foo.bar/dingleballdingle2", "dingle{0}{1}{2}", new object[] { "ball", "dingle", 2 })]
         public void AddLinkTest3(string result, string relPathFormat, object[] items)
         {
-            const string relLabel = "rel";
-
-            var http = new TestHttpContext(new TestHttpRequest
-            {
-                Scheme = "https",
-                Host = new HostString("foo.bar"),
-            });
-
-            var linkbuilder = http.AddFormattedLink(relLabel, relPathFormat, items);
+            var linkbuilder = GetHttpContext().AddFormattedLink(rel, relPathFormat, items);
 
             Assert.Equal(new Link
             {
                 Href = result,
-                Rel = relLabel,
+                Rel = rel,
             }, linkbuilder.Build().First());
         }
 
@@ -50,15 +42,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         [InlineData("Parameter cannot be null, empty or whitespace. (Parameter 'relPathFormat')", "\t", new object[] { "ball", "dingle", 2 })]
         public void AddLinkTest4(string result, string? relPathFormat, object[] items)
         {
-            const string relLabel = "rel";
-
-            var http = new TestHttpContext(new TestHttpRequest
-            {
-                Scheme = "https",
-                Host = new HostString("foo.bar"),
-            });
-
-            var caught = Assert.Throws<ArgumentException>(() => http.AddFormattedLink(relLabel, relPathFormat, items));
+            var caught = Assert.Throws<ArgumentException>(() => GetHttpContext().AddFormattedLink(rel, relPathFormat, items));
 
             Assert.Equal(result, caught.Message);
         }
