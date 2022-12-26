@@ -9,7 +9,8 @@ namespace MeyerCorp.HateoasBuilder.Test
         [Theory(DisplayName = "HttpContext.AddLink (pass)")]
         [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
         [InlineData("https://foo.bar/dingle", "dingle")]
-        [InlineData("https://foo.bar", null)]
+        [InlineData("https://foo.bar", null)]        [InlineData("https://foo.bar", "")]
+        [InlineData("https://foo.bar", "\t")]
         public void AddLinkHttpContextPassTest(string result, string relativeUrl)
         {
             var links = GetHttpContext()
