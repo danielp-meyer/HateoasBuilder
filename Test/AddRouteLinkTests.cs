@@ -4,7 +4,7 @@ using Xunit;
 
 namespace MeyerCorp.HateoasBuilder.Test
 {
-    public class AddRouteLinks : ExtensionTest
+    public class AddRouteLinkTests : ExtensionTest
     {
         [Theory(DisplayName = "HttpClient.AddRouteLink (pass).")]
         [InlineData("https://foo.bar/relative/ball", new object[] { "relative", "ball" })]
@@ -14,11 +14,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var links = GetHttpContext().AddRouteLink(rel, items).Build();
 
-            Assert.Equal(new Link
-            {
-                Href = result,
-                Rel = rel,
-            }, links.First());
+            Assert.Equal(new Link(rel,result), links.First());
         }
 
         [Theory(DisplayName = "String.AddRouteLink (pass).")]
@@ -29,11 +25,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var links = baseUrl.AddRouteLink(rel, items).Build();
 
-            Assert.Equal(new Link
-            {
-                Href = result,
-                Rel = rel,
-            }, links.First());
+            Assert.Equal(new Link(rel,result), links.First());
         }
 
         [Theory(DisplayName = "HttpContext.AddRouteLink (fail).")]

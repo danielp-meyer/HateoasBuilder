@@ -43,13 +43,9 @@ namespace MeyerCorp.HateoasBuilder.Test
             const string rel = "rel";
             var test = new LinkBuilder("http://foo.bar");
 
-            test.AddFormattedLink(rel, format, items.ToArray());
-            Assert.Single(test.Build());
-            Assert.Equal(new Link
-            {
-                Href = result,
-                Rel = rel,
-            }, test[0]);
+            var links = test.AddFormattedLink(rel, format, items.ToArray()).Build();
+            Assert.Single(links);
+            Assert.Equal(new Link(rel, result), links.First());
         }
 
         [Theory(DisplayName = "AddQueryLink (pass)")]

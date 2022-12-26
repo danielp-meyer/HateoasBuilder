@@ -14,13 +14,14 @@ namespace MeyerCorp.HateoasBuilder.Test
         [InlineData("https://foo.bar/dingleballdingle2", "dingle{0}{1}{2}", new object[] { "ball", "dingle", 2 })]
         public void AddFormattedLinkHttpContextPass(string result, string relPathFormat, object[] items)
         {
-            var linkbuilder = GetHttpContext().AddFormattedLink(rel, relPathFormat, items);
+            var linkbuilder = GetHttpContext()
+                .AddFormattedLink(rel, relPathFormat, items)
+                .Build()
+                .First();
 
-            Assert.Equal(new Link
-            {
-                Href = result,
-                Rel = rel,
-            }, linkbuilder.Build().First());
+            var expected = new Link(rel, result);
+
+            Assert.Equal(expected, linkbuilder);
         }
 
         [Theory(DisplayName = "HttpContext.AddFormattedLink (fail).")]
@@ -42,11 +43,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var linkbuilder = baseUrl.AddFormattedLink(rel, relPathFormat, items);
 
-            Assert.Equal(new Link
-            {
-                Href = result,
-                Rel = rel,
-            }, linkbuilder.Build().First());
+            Assert.Equal(new Link(rel,result), linkbuilder.Build().First());
         }
 
         [Theory(DisplayName = "String.AddFormattedLink (fail).")]

@@ -29,11 +29,7 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var linkbuilder = GetHttpContext().AddFormattedLink(rel, relPathFormat, items);
 
-            Assert.Equal(new Link
-            {
-                Href = result,
-                Rel = rel,
-            }, linkbuilder.Build().First());
+            Assert.Equal(new Link(rel,result), linkbuilder.Build().First());
         }
 
         [Theory(DisplayName = "HttpContext.AddLink (failx).")]
@@ -59,11 +55,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             const string baseUrl = "https://foo.bar";
 
             var output = baseUrl.AddFormattedLink(relLabel, relPathFormat, items).Build().First();
-            var expected = new Link
-            {
-                Href = result,
-                Rel = "rel"
-            };
+            var expected = new Link(rel,result);
 
             Assert.Equal(expected.Href, output.Href);
             Assert.Equal(expected.Rel, output.Rel);
@@ -103,9 +95,9 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var links = new List<Link>
             {
-                new Link{ Href="href",Rel="href"},
-                new Link{ Href="href1",Rel="href1"},
-                new Link{ Href="href2",Rel="href2"}
+                new Link(rel,rel),
+                new Link(rel,rel),
+                new Link(rel,rel)
             };
 
             Assert.Equal(rel, links.ToHref(rel));
