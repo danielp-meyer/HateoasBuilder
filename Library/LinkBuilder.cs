@@ -100,9 +100,11 @@ namespace MeyerCorp.HateoasBuilder
             if (routeItems.Any(ri => ri == null)) throw new ArgumentException($"No elements in the collection can be null.", nameof(routeItems));
 
             var items = routeItems.Select(ri => ri?.ToString());
-            var route = String.Join('/', items).ToArray();
+            var route = items.Count() > 0
+                ? String.Join('/', items)
+                : null;
 
-            return AddLink(relLabel, String.Concat(relativeUrl, '/', items));
+            return AddLink(relLabel, String.Concat(relativeUrl, '/', route));
         }
 
         /// <summary>
