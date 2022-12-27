@@ -18,6 +18,24 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal("Parameter cannot be null, empty, or whitespace. (Parameter 'baseUrl')", caught.Message);
         }
 
+        [Fact(DisplayName = "BuildEncoded")]
+        public void LinkBuilderBuildTest()
+        {
+            var result = baseUrl.AddQueryLink(rel, "base", "test", "?", "test1", "Spa ce").BuildEncoded();
+
+            Assert.Equal("rel", result.First().Rel);
+            Assert.Equal("https://foo.bar/base%3ftest%3d%3f%26test1%3dSpa+ce", result.First().Href);
+        }
+
+        [Fact(DisplayName = "Build (not encoded)")]
+        public void LinkBuilderBuildTest1()
+        {
+            var result = baseUrl.AddQueryLink(rel, "base", "test", "?", "test1", "Spa ce").Build();
+
+            Assert.Equal("rel", result.First().Rel);
+            Assert.Equal("https://foo.bar/base?test=?&test1=Spa ce", result.First().Href);
+        }
+
         [Theory(DisplayName = "Check null/empty parameters.")]
         [InlineData(null, "asdf", new object[] { "test" }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relLabel')")]
         [InlineData("asdf", null, new object[] { "test" }, "Parameter cannot be null, empty, or whitespace. (Parameter 'relativeUrlFormat')")]
@@ -85,7 +103,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(relLabel, links.First().Rel);
             Assert.Equal(result, links.First().Href);
         }
-  
+
         [Theory(DisplayName = "AddLink (pass)")]
         [InlineData("http://foo.bar", "base", "")]
         [InlineData("http://foo.bar", "base", null)]
@@ -100,5 +118,5 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(relLabel, links.First().Rel);
             Assert.Equal(result, links.First().Href);
         }
-  }
+    }
 }
