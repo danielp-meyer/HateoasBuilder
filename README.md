@@ -106,6 +106,10 @@ public object GetAll()
 
 By using the extension method for the `HttpContext`, the link builder is able to determine the base URL and append the employees route. This allow you to not worry what the base URL as the `HttpContext` knows this and links can be created dynamically.
 
+### Sample API
+
+Included in this repository is a minimal .NET Web API application that references the library and demonstrates how to use some methods. Feel free to use this Postman collection to make calls to the API: [MmeyerCorporation/Hateoasbuilder](https://www.postman.com/meyerdevelopment/workspace/meyercorporation-hateoasbuilder).
+
 ## Methods
 
 Various methods allow convenient creation of links. They are all methods of the LinkBuilder class as well as complimentary extension methods that allow initializing the LinkBuilder object starting with a base URL string or the `HttpContext` property of a Web API controller.
