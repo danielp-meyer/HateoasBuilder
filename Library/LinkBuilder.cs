@@ -44,7 +44,7 @@ namespace MeyerCorp.HateoasBuilder
         /// Build all added links and yield as a collection of links.
         /// </summary>
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        public IEnumerable<Link> Build(bool encode = false)
+        IEnumerable<Link> Build(bool encode)
         {
             return RelHrefPairs
                 .Select(p =>
@@ -52,11 +52,23 @@ namespace MeyerCorp.HateoasBuilder
                     var relativeurl = encode
                         ? System.Web.HttpUtility.UrlEncode(p.Item2?.Trim())
                         : p.Item2?.Trim();
-                    var href = String.Concat(BaseUrl, '/', p.Item2?.Trim()).Trim('/');
+                    var href = String.Concat(BaseUrl, '/', relativeurl).Trim('/');
 
                     return new Link(p.Item1, href);
                 });
         }
+
+        /// <summary>
+        /// Build all added links and yield as a collection of links.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
+        public IEnumerable<Link> Build() => Build(false);
+
+        /// <summary>
+        /// Build all added links and yield as a collection of links all of which are URL encoded.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
+        public IEnumerable<Link> BuildEncoded() => Build(true);
 
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
