@@ -104,7 +104,7 @@ public object GetAll()
 }
 ```
 
-By using the extension method for the `HttpContext`, the link builder is able to determine the base URL and append the employees route. This allow you to not worry what the base URL as the `HttpContext` knows this and links can be created dynamically.
+By using the extension method for the `HttpContext`, the link builder is able to determine the base URL and append the employees route. This allow you to not worry what the base URL is as the `HttpContext` knows this and links can be created dynamically.
 
 ### Sample API
 
@@ -132,7 +132,7 @@ this.HttpContext
 
 `AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
 
-#### #### Example
+#### Example
 
 ```C#
 "https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
@@ -146,22 +146,22 @@ this.HttpContext
 
 ### AddQueryLink
 
-`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many route items as you like appended to that.
+`AddRouteLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and add as many query parameters as you like appended to that.
 
 #### AddQueryLink Example
 
 ```C#
-"https://foo.bar".AddRouteLink("label", "relativeUrl", "route", 1, "subroute", 2);
+"https://foo.bar".AddQueryLink("label", "relativeUrl", "route", 1, "subroute", 2);
 
 // or
 this.HttpContext
-    .AddRouteLink("employees", "id", 1, "dateOfHire", "wednesday") //https://foobar/employees?id=1&dateOfHire=wednesday
-    .AddRouteLink("locations", "id", 2, "address", "95687") //https://foobar/locations?id=2&address=95687
-    .AddRouteLink("products", "id", 3, "price", "100") //https://foobar/products?id=3&price=100
-    .AddRouteLink("products", "id", null, "price", "100"); //https://foobar/products?id=&price=100
+    .AddQueryLink("employees", "id", 1, "dateOfHire", "wednesday") //https://foobar/employees?id=1&dateOfHire=wednesday
+    .AddQueryLink("locations", "id", 2, "address", "95687") //https://foobar/locations?id=2&address=95687
+    .AddQueryLink("products", "id", 3, "price", "100") //https://foobar/products?id=3&price=100
+    .AddQueryLink("products", "id", null, "price", "100"); //https://foobar/products?id=&price=100
 ```
 
-### AddFormattedLink(s)
+### AddFormattedLink
 
 `AddFormattedLink` allows you to add a relative URL to the base URL which is either extracted from the `HttpContext` or a string and format your URL as you like as if you were using `String.Format()`.
 
@@ -169,21 +169,21 @@ this.HttpContext
 
 ```C#
 this.HttpContext
-    .AddRouteLink("{0}/{1}/{2}?{3}={4}"employees", "id", 1, "dateOfHire", "wednesday") //https://foobar/employees/id/1?dateOfHire=wednesday
-    .AddRouteLink("locations", "id", 2, "address") //https://foobar/locations/id/2/address
-    .AddRouteLink("products", "id", 3, "price"); //https://foobar/products/id/3/price
+    .AddFormattedLink("{0}/{1}/{2}?{3}={4}"employees", "id", 1, "dateOfHire", "wednesday") //https://foobar/employees/id/1?dateOfHire=wednesday
+    .AddFormattedLink("locations", "id", 2, "address") //https://foobar/locations/id/2/address
+    .AddFormattedLink("products", "id", 3, "price"); //https://foobar/products/id/3/price
 ```
 
-### Build
+### Build | BuildEncoded
 
-`Build` is always the final call in the chain and returns the the links/name pairs as a collection which can be added to your returned data object. The `Link` objects will serialize to JSON automatically. XML is not officially supported at this time.
+`Build` or `BuildEncoded` is always the final call in the chain and returns the the links/name pairs as a collection which can be added to your returned data object. The `Link` objects will serialize to JSON automatically. XML is not officially supported at this time. `BuildEncoded` will encode your URLs which is a good practice but also crucial if your parameters contain special characters such as spaces, question marks, equal signs, etc.
 
 #### Build Example
 
 ```C#
 this.HttpContext
     .AddRouteLink("employees", "id", 1, "dateOfHire") //https://foobar/employees/id/1/dateOfHire
-    .Build(encode: false); //[ https://foobar/employees/id/3/price ... ]
+    .Build(); //[ https://foobar/employees/id/3/price ... ]
 ```
 
 ### AddParameters
@@ -204,10 +204,11 @@ this.HttpContext
 * Always use the extension methods to create the link builder.
 * Do not try to create a link builder as a member of a class. Only create an instance as a local variable in a method.
 * Do not reuse an instance of the link builder.
+* Most methods rely on a `params` attributed array parameter so you can just use an array instead of an explicit list of values.
 
 ### Which Method to Use
 
-If you want to format your URL using inline syntax, then use `AddLink`:
+If your URL is simple and not dynamically generated, or you want to format your URL using inline syntax, then use `AddLink`:
 
 ```C#
 var relativeUrl = "employees";
@@ -239,6 +240,55 @@ var routeValue3 = "Vallejo";
 HttpContext.AddRouteLink(relativeUrl, route1, reouteValue1, route2, routeValue2, route3, routeValue3);
 
 // https://foo.bar/employees/id/1234/dateOfHire/20231225/location/Vallejo
+```
+
+If your link relies on only parameters, then use `AddQueryLink`:
+
+```C#
+var relativeUrl = "employees";
+var param1 = "id";
+var paramValue1 = "1234";
+var param2 = "dateOfHire";
+var paramValue2 = "20231225";
+var param3 = "location";
+var paramValue3 = "Vallejo";
+
+HttpContext.AddQueryLink(relativeUrl, param1, paramValue1, param2, paramValue2, param3, paramValue3);
+
+// https://foo.bar/employees/?id=1234&dateOfHire=20231225&location=Vallejo
+```
+
+If your link relies on a route along with parameters, then use `AddQueryLink` and `AddParameters`:
+
+```C#
+var relativeUrl = "employees";
+var route1 = "id";
+var routeValue1 = "1234";
+var param2 = "dateOfHire";
+var paramValue2 = "20231225";
+var param3 = "location";
+var paramValue3 = "Vallejo";
+
+HttpContext.AddRouteLink(relativeUrl, route1, routeValue1).AddParameters(param2, paramValue2, param3, paramValue3);
+
+// https://foo.bar/employees/id/1234/?dateOfHire=20231225&location=Vallejo
+```
+
+If you prefer using a format string or your format is dynamically generated, then use `AddFormattedLink`:
+
+```C#
+var format = "{0}/{1}/{2}/?{3}={4}&{5}={6}";
+var relativeUrl = "employees";
+var route1 = "id";
+var routeValue1 = "1234";
+var param2 = "dateOfHire";
+var paramValue2 = "20231225";
+var param3 = "location";
+var paramValue3 = "Vallejo";
+
+HttpContext.AddFormattedLink(format, relativeUrl, route1, routeValue1, param2, paramValue2, param3, paramValue3);
+
+// https://foo.bar/employees/id/1234/?dateOfHire=20231225&location=Vallejo
 ```
 
 ## Glossary
