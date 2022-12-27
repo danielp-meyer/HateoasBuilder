@@ -67,7 +67,7 @@ namespace MeyerCorp.HateoasBuilder
         public LinkBuilder AddLink(string relLabel, string rawRelativeUrl)
         {
             relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
-            rawRelativeUrl.CheckIfNullOrWhiteSpace(nameof(rawRelativeUrl));
+            // rawRelativeUrl.CheckIfNullOrWhiteSpace(nameof(rawRelativeUrl));
 
             RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
@@ -104,7 +104,11 @@ namespace MeyerCorp.HateoasBuilder
                 ? String.Join('/', items)
                 : null;
 
-            return AddLink(relLabel, String.Concat(relativeUrl, '/', route));
+            var url = String.IsNullOrWhiteSpace(relativeUrl)
+                ? String.Empty
+                : String.Concat(relativeUrl, '/');
+
+            return AddLink(relLabel, String.Concat(relativeUrl, route));
         }
 
         /// <summary>
