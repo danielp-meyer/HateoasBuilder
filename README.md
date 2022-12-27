@@ -199,6 +199,48 @@ this.HttpContext
     .Build(); //Yields: https://foobar/employees/id/1/dateOfHire?location=1&address=2
 ```
 
+## Best Practices
+
+* Always use the extension methods to create the link builder.
+* Do not try to create a link builder as a member of a class. Only create an instance as a local variable in a method.
+* Do not reuse an instance of the link builder.
+
+### Which Method to Use
+
+If you want to format your URL using inline syntax, then use `AddLink`:
+
+```C#
+var relativeUrl = "employees";
+var route1 = "id";
+var routeValue = "1234";
+var query = "dateOfHire";
+var queryValue = "20231225";
+var query1 = "location";
+var queryValue1 = "Vallejo";
+
+var href = $"{relativeUrl}/{route1}/{routeValue}?{query}={queryValue}&{query1}={queryValue1}";
+
+HttpContext.AddLink(href);
+
+// https://foo.bar/employees/id/1234?dateOfHire=20231225&location=Vallejo
+```
+
+If your link relies on the route (w/o parameters) , then use `AddRouteLink`:
+
+```C#
+var relativeUrl = "employees";
+var route1 = "id";
+var routeValue1 = "1234";
+var route2 = "dateOfHire";
+var routeValue2 = "20231225";
+var route3 = "location";
+var routeValue3 = "Vallejo";
+
+HttpContext.AddRouteLink(relativeUrl, route1, reouteValue1, route2, routeValue2, route3, routeValue3);
+
+// https://foo.bar/employees/id/1234/dateOfHire/20231225/location/Vallejo
+```
+
 ## Glossary
 
 * REST: [**RE**presentational **S**tate **T**ransfer](https://restfulapi.net/)
