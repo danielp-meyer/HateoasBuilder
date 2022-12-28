@@ -21,9 +21,17 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
         internal LinkBuilder(string baseUrl) => BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
 
+        internal LinkBuilder(bool lastIgnored, string baseUrl)
+        {
+            BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
+            this.LastIgnored = lastIgnored;
+        }
+
         internal LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
         internal LinkBuilder(HttpContext httpContext) : this(httpContext.ToBaseUrl()) { }
+
+        internal LinkBuilder(bool lastIgnored, HttpContext httpContext) : this(lastIgnored, httpContext.ToBaseUrl()) { }
 
         /// <summary>
         /// The base URL which all presented links will use
@@ -34,6 +42,9 @@ namespace MeyerCorp.HateoasBuilder
             get => baseUrl.Trim();
             private set => baseUrl = value;
         }
+
+        [JsonIgnore]
+        internal bool LastIgnored { get; set; } = false;
 
         /// <summary>
         /// Build all added links and yield as a collection of links.
@@ -69,6 +80,7 @@ namespace MeyerCorp.HateoasBuilder
         {
             var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
 
+            LastIgnored = false;
             RelHrefPairs.Add(rel, rawRelativeUrl);
 
             return this;
@@ -76,11 +88,13 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddLink(bool condition, string relLabel, string rawRelativeUrl)
         {
+            LastIgnored = !condition;
+
             return condition
                 ? AddLink(relLabel, rawRelativeUrl)
                 : this;
         }
-       
+
         public LinkBuilder AddQueryLink(string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
@@ -88,6 +102,8 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddQueryLink(bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
         {
+            LastIgnored = !condition;
+
             return condition
                 ? AddQueryLink(relLabel, relativeUrl, relativeUrl, queryPairs)
                 : this;
@@ -111,6 +127,8 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddRouteLink(bool condition, string relLabel, string relativeUrl, params object[] routeItems)
         {
+            LastIgnored = !condition;
+
             return condition
                 ? AddRouteLink(relLabel, relativeUrl, routeItems)
                 : this;
@@ -134,9 +152,11 @@ namespace MeyerCorp.HateoasBuilder
 
         public LinkBuilder AddFormattedLink(bool condition, string relLabel, string relativeUrlFormat, params object[] arguments)
         {
+            LastIgnored = !condition;
+
             return condition
-                ? AddFormattedLink(relLabel, relativeUrlFormat, relativeUrlFormat, arguments)
-                : this;
+                 ? AddFormattedLink(relLabel, relativeUrlFormat, relativeUrlFormat, arguments)
+                 : this;
         }
 
         /// <summary>
@@ -144,34 +164,37 @@ namespace MeyerCorp.HateoasBuilder
         /// </summary>
         public LinkBuilder AddParameters(params object[] queryPairs)
         {
-            if (queryPairs == null) throw new ArgumentNullException(nameof(queryPairs));
-
-            var query = new StringBuilder();
-
-            for (var index = 0; index < queryPairs.Length; index += 2)
+            if (!LastIgnored)
             {
-                var first = queryPairs[index]?.ToString().Trim();
-                var second = queryPairs.Length > index + 1
-                    ? queryPairs[index + 1]?.ToString().Trim()
-                    : null;
+                if (queryPairs == null) throw new ArgumentNullException(nameof(queryPairs));
 
-                query.Append($"{first}={second}&");
-            }
+                var query = new StringBuilder();
 
-            var queries = query.ToString().Length > 0
-                ? query.ToString().Trim('&')
-                : String.Empty;
+                for (var index = 0; index < queryPairs.Length; index += 2)
+                {
+                    var first = queryPairs[index]?.ToString().Trim();
+                    var second = queryPairs.Length > index + 1
+                        ? queryPairs[index + 1]?.ToString().Trim()
+                        : null;
 
-            if (RelHrefPairs.Count < 1)
-                throw new InvalidOperationException("At least one link must be added before query parameters can be added.");
-            else
-            {
-                var rel = RelHrefPairs.Last().Item1;
-                var href = RelHrefPairs.Last().Item2;
+                    query.Append($"{first}={second}&");
+                }
 
-                RelHrefPairs.RemoveAt(RelHrefPairs.Count - 1);
+                var queries = query.ToString().Length > 0
+                    ? query.ToString().Trim('&')
+                    : String.Empty;
 
-                AddLink(rel, String.Concat(href, '?', queries));
+                if (RelHrefPairs.Count < 1)
+                    throw new InvalidOperationException("At least one link must be added before query parameters can be added.");
+                else
+                {
+                    var rel = RelHrefPairs.Last().Item1;
+                    var href = RelHrefPairs.Last().Item2;
+
+                    RelHrefPairs.RemoveAt(RelHrefPairs.Count - 1);
+
+                    AddLink(rel, String.Concat(href, '?', queries));
+                }
             }
 
             return this;

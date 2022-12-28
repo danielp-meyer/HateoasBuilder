@@ -97,14 +97,14 @@ namespace MeyerCorp.HateoasBuilder
         {
             return condition
                 ? baseUrl.AddLink(relLabel, String.Format(relPathFormat, formatItems))
-                : new LinkBuilder(baseUrl);
+                : new LinkBuilder(!condition,baseUrl);
         }
 
         public static LinkBuilder AddFormattedLink(this HttpContext httpContext, bool condition, string relLabel, string relPathFormat, params object[] formatItems)
         {
             return condition
                 ? httpContext.AddFormattedLink(relLabel, relPathFormat, formatItems)
-                : new LinkBuilder(httpContext);
+                : new LinkBuilder(!condition,httpContext);
         }
 
         public static LinkBuilder AddQueryLink(this string baseUrl, string relLabel, string relativeUrl, params object[] queryPairs)
@@ -121,14 +121,14 @@ namespace MeyerCorp.HateoasBuilder
         {
             return condition
                 ? baseUrl.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs)
-                : new LinkBuilder(baseUrl);
+                : new LinkBuilder(!condition,baseUrl);
         }
 
         public static LinkBuilder AddQueryLink(this HttpContext httpContext, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return condition
                 ? httpContext.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs)
-                : new LinkBuilder(httpContext);
+                : new LinkBuilder(!condition, httpContext);
         }
 
         public static LinkBuilder AddRouteLink(this HttpContext httpContext, string relLabel, params object[] routeItems)
@@ -156,14 +156,14 @@ namespace MeyerCorp.HateoasBuilder
         {
             return condition
                 ? httpContext.AddRouteLink(relLabel, routeItems)
-                : new LinkBuilder(httpContext);
+                : new LinkBuilder(!condition, httpContext);
         }
 
         public static LinkBuilder AddRouteLink(this string baseUrl, bool condition, string relLabel, params object[] routeItems)
         {
             return condition
                 ? baseUrl.AddRouteLink(relLabel, routeItems)
-                : new LinkBuilder(baseUrl);
+                : new LinkBuilder(!condition, baseUrl);
         }
 
         // public static LinkBuilder AddFormattedLinks(this string baseUrl, string rel, string format, IEnumerable<string> items)
@@ -188,13 +188,13 @@ namespace MeyerCorp.HateoasBuilder
             return links.Single(l => l.Rel == rel).Href;
         }
 
-        // public static TResult[] ToNullFilteredArray<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
-        // {
-        //     return source
-        //         .Select(v => selector(v))
-        //         .Where(v => v != null)
-        //         .ToArray();
-        // }
+        public static string CheckIfNullOrWhiteSpace(this string value, string parameterName)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", parameterName);
+            else
+                return value.Trim();
+        }
 
         /// <summary>
         /// Extension method allowing convenient sequential generation of hash values for overriding GetHash methods.
@@ -213,14 +213,6 @@ namespace MeyerCorp.HateoasBuilder
             return value == null
                 ? hash
                 : hash * seed + value.GetHashCode();
-        }
-
-        public static string CheckIfNullOrWhiteSpace(this string value, string parameterName)
-        {
-            if (String.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", parameterName);
-            else
-                return value.Trim();
         }
     }
 }
