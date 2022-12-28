@@ -12,7 +12,7 @@ namespace MeyerCorp.HateoasBuilder
         private string baseUrl = default!;
 
         [JsonIgnore]
-        List<Tuple<string, string?>> RelHrefPairs { get; set; } = new List<Tuple<string, string?>>();
+        List<Tuple<string, LinkInformation>> RelHrefPairs { get; set; } = new List<Tuple<string, LinkInformation>>();
 
         /// <summary>
         /// Default constructor
@@ -29,7 +29,7 @@ namespace MeyerCorp.HateoasBuilder
 
         internal LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
-        internal LinkBuilder(HttpContext httpContext) : this(httpContext.ToBaseUrl()) { }
+        // internal LinkBuilder(HttpContext httpContext) : this(httpContext.ToBaseUrl()) { }
 
         internal LinkBuilder(bool lastIgnored, HttpContext httpContext) : this(lastIgnored, httpContext.ToBaseUrl()) { }
 
@@ -52,16 +52,16 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
         public IEnumerable<Link> Build(bool encode = false)
         {
-            return RelHrefPairs
-                .Select(p =>
-                {
-                    var relativeurl = encode
-                        ? System.Web.HttpUtility.UrlEncode(p.Item2?.Trim())
-                        : p.Item2?.Trim();
-                    var href = String.Concat(BaseUrl, '/', relativeurl).Trim('/');
+            return RelHrefPairs.Select(p =>
+            {
+                var url = new StringBuilder();
+                var relativeurl = p.Item2.GetUrl(encode);
 
-                    return new Link(p.Item1, href);
-                });
+                url.Append(baseUrl);
+                if (String.IsNullOrWhiteSpace(relativeurl)) url.AppendFormat("/{0}", relativeurl);
+
+                return new Link(p.Item1, url.ToString());
+            });
         }
 
         /// <summary>

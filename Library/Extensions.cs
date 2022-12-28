@@ -7,11 +7,11 @@ namespace MeyerCorp.HateoasBuilder
 {
     public static class Extensions
     {
-        internal static void Add(this List<Tuple<string, string?>> list, string relLabel, string? rawRelativeUrl)
+        internal static void Add(this List<Tuple<string, LinkInformation>> list, string relLabel, string? rawRelativeUrl)
         {
             var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
 
-            list.Add(new Tuple<string, string?>(rel, rawRelativeUrl));
+            list.Add(new Tuple<string, LinkInformation>(rel, new LinkInformation(rawRelativeUrl)));
         }
 
         internal static string ToBaseUrl(this HttpContext httpContext)
@@ -75,9 +75,7 @@ namespace MeyerCorp.HateoasBuilder
                 return httpContext.AddLink(relLabel, rawRelativeUrl);
             else
             {
-                if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
-
-                return new LinkBuilder(httpContext);
+                return new LinkBuilder(!condition, httpContext);
             }
         }
 
@@ -97,14 +95,14 @@ namespace MeyerCorp.HateoasBuilder
         {
             return condition
                 ? baseUrl.AddLink(relLabel, String.Format(relPathFormat, formatItems))
-                : new LinkBuilder(!condition,baseUrl);
+                : new LinkBuilder(!condition, baseUrl);
         }
 
         public static LinkBuilder AddFormattedLink(this HttpContext httpContext, bool condition, string relLabel, string relPathFormat, params object[] formatItems)
         {
             return condition
                 ? httpContext.AddFormattedLink(relLabel, relPathFormat, formatItems)
-                : new LinkBuilder(!condition,httpContext);
+                : new LinkBuilder(!condition, httpContext);
         }
 
         public static LinkBuilder AddQueryLink(this string baseUrl, string relLabel, string relativeUrl, params object[] queryPairs)
@@ -121,7 +119,7 @@ namespace MeyerCorp.HateoasBuilder
         {
             return condition
                 ? baseUrl.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs)
-                : new LinkBuilder(!condition,baseUrl);
+                : new LinkBuilder(!condition, baseUrl);
         }
 
         public static LinkBuilder AddQueryLink(this HttpContext httpContext, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)

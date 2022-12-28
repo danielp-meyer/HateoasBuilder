@@ -4,57 +4,57 @@ using Xunit;
 
 namespace MeyerCorp.HateoasBuilder.Test
 {
-    public class AddLinkTests : ExtensionTest
+    public class AddParametersTests : ExtensionTest
     {
         [Theory(DisplayName = "HttpContext.AddLink (pass)")]
-        [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
-        [InlineData("https://foo.bar/dingle", "dingle")]
-        [InlineData("https://foo.bar", null)]
-        [InlineData("https://foo.bar", "")]
-        [InlineData("https://foo.bar", "\t")]
-        public void AddLinkHttpContextPassTest(string result, string relativeUrl)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void AddParametersToAddLinkTrueTest(bool condition)
         {
             var links = GetHttpContext()
-                .AddLink(rel, relativeUrl)
+                .AddLink(condition, rel, "relativeUrl")
+                .AddParameters("name", "value")
+                .AddLink(!condition, rel, "relativeUrl")
+                .AddParameters("name", "value")
                 .Build();
 
             Assert.Single(links);
-            Assert.Equal(result, links.First().Href);
+            Assert.Equal("https://foo.bar/relativeUrl?name=value", links.First().Href);
             Assert.Equal(rel, links.First().Rel);
         }
 
-        [Theory(DisplayName = "String.AddLink (pass)")]
-        [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
-        [InlineData("https://foo.bar/dingle", "dingle")]
-        [InlineData("https://foo.bar", null)]
-        [InlineData("https://foo.bar", "")]
-        [InlineData("https://foo.bar", "\t")]
-        public void AddLinkStringPassTest(string result, string relativeUrl)
+        [Theory(DisplayName = "HttpContext.AddLink (pass)")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void AddParametersToAddRouteLinkTrueTest(bool condition)
         {
-            var links = baseUrl
-                .AddLink(rel, relativeUrl)
+            var links = GetHttpContext()
+                .AddRouteLink(condition, rel, "relativeUrl")
+                .AddParameters("name", "value")
+                .AddRouteLink(!condition, rel, "relativeUrl")
+                .AddParameters("name", "value")
                 .Build();
 
             Assert.Single(links);
-            Assert.Equal(result, links.First().Href);
+            Assert.Equal("https://foo.bar/relativeUrl?name=value", links.First().Href);
             Assert.Equal(rel, links.First().Rel);
         }
 
-        [Theory(DisplayName = "String.AddLink false (pass)")]
-        [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", false, 1, "dingle/ball?value1=1&value2=2")]
-        [InlineData("https://foo.bar/dingle", true, 1, "dingle")]
-        // [InlineData("https://foo.bar", false, null)]
-        // [InlineData("https://foo.bar", false, "")]
-        // [InlineData("https://foo.bar", false, "\t")]
-        public void AddLinkStringFalsePassTest(string result, bool condition, int count, string relativeUrl)
+        [Theory(DisplayName = "HttpContext.AddQueryLink (pass)")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void AddParametersToAddQueryLinkTrueTest(bool condition)
         {
-            var links = baseUrl
-                .AddLink(condition, rel, relativeUrl)
-                .AddLink(!condition, rel, relativeUrl)
+            var links = GetHttpContext()
+                .AddQueryLink(condition, rel, "relativeUrl", "name1", "value1")
+                .AddParameters("name", "value")
+                .AddQueryLink(!condition, rel, "relativeUrl", "name1", "value1")
+                .AddParameters("name", "value")
                 .Build();
 
-            Assert.Equal(count, links.Count());
-            if (count > 0) Assert.Equal(new Link(rel, result), links.First());
+            Assert.Single(links);
+            Assert.Equal("https://foo.bar/relativeUrl?name1=value1&name=value", links.First().Href);
+            Assert.Equal(rel, links.First().Rel);
         }
 
         [Theory(DisplayName = "HttpContext.AddLink (fail)")]
