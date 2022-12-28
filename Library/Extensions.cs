@@ -14,6 +14,26 @@ namespace MeyerCorp.HateoasBuilder
             list.Add(new Tuple<string, LinkInformation>(rel, new LinkInformation(rawRelativeUrl)));
         }
 
+        internal static void AddRouteLink(this List<Tuple<string, LinkInformation>> list, string relLabel, params object[] routeItems)
+        {
+            if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
+
+            var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
+            var linkinformation = new LinkInformation(routeItems, null);
+
+            list.Add(new Tuple<string, LinkInformation>(rel, linkinformation));
+        }
+
+        internal static void AddQueryLink(this List<Tuple<string, LinkInformation>> list, string relLabel, params object[] queryItems)
+        {
+            if (queryItems == null) throw new ArgumentNullException(nameof(queryItems));
+
+            var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
+            var linkinformation = new LinkInformation(null, queryItems);
+
+            list.Add(new Tuple<string, LinkInformation>(rel, linkinformation));
+        }
+
         internal static string ToBaseUrl(this HttpContext httpContext)
         {
             if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
@@ -60,12 +80,9 @@ namespace MeyerCorp.HateoasBuilder
         /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? rawRelativeUrl)
         {
-            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
-
-            var request = httpContext.Request;
-            var baseurl = $"{request.Scheme}://{request.Host}";
-
-            return baseurl.AddLink(relLabel, rawRelativeUrl);
+            return httpContext
+                .ToBaseUrl()
+                .AddLink(relLabel, rawRelativeUrl);
         }
 
         public static LinkBuilder AddLink(this HttpContext httpContext, bool condition, string relLabel, string? rawRelativeUrl)
@@ -107,12 +124,16 @@ namespace MeyerCorp.HateoasBuilder
 
         public static LinkBuilder AddQueryLink(this string baseUrl, string relLabel, string relativeUrl, params object[] queryPairs)
         {
-            return baseUrl.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
+            return baseUrl
+                .AddRouteLink(relLabel, relativeUrl)
+                .AddParameters(queryPairs);
         }
 
         public static LinkBuilder AddQueryLink(this HttpContext httpContext, string relLabel, string relativeUrl, params object[] queryPairs)
         {
-            return httpContext.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
+            return httpContext
+                .ToBaseUrl()
+                .AddQueryLink(relLabel, relativeUrl, queryPairs);
         }
 
         public static LinkBuilder AddQueryLink(this string baseUrl, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
@@ -125,7 +146,7 @@ namespace MeyerCorp.HateoasBuilder
         public static LinkBuilder AddQueryLink(this HttpContext httpContext, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return condition
-                ? httpContext.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs)
+                ? httpContext.AddQueryLink(relLabel, relativeUrl,queryPairs)
                 : new LinkBuilder(!condition, httpContext);
         }
 
@@ -135,19 +156,18 @@ namespace MeyerCorp.HateoasBuilder
             // Consider the first item as the relativeUrl...
             if (routeItems.Length > 1 && routeItems.Any(ri => ri == null)) throw new ArgumentException("Collection cannot contain null elements.", nameof(routeItems));
 
-            var output = String.Join('/', routeItems.Select(ri => ri?.ToString()));
-
-            return httpContext.AddLink(relLabel, output);
+            return httpContext
+                .ToBaseUrl()
+                .AddRouteLink(relLabel, routeItems);
         }
 
         public static LinkBuilder AddRouteLink(this string baseUrl, string relLabel, params object[] routeItems)
         {
-            if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
-            if (routeItems.Length > 1 && routeItems.Any(ri => ri == null)) throw new ArgumentException("Collection cannot contain null elements.", nameof(routeItems));
+            var builder= new LinkBuilder(baseUrl);
 
-            var output = String.Join('/', routeItems.Select(ri => ri?.ToString()));
+            builder.AddRouteLink(relLabel, routeItems);
 
-            return baseUrl.AddLink(relLabel, output);
+            return builder;
         }
 
         public static LinkBuilder AddRouteLink(this HttpContext httpContext, bool condition, string relLabel, params object[] routeItems)
@@ -163,15 +183,6 @@ namespace MeyerCorp.HateoasBuilder
                 ? baseUrl.AddRouteLink(relLabel, routeItems)
                 : new LinkBuilder(!condition, baseUrl);
         }
-
-        // public static LinkBuilder AddFormattedLinks(this string baseUrl, string rel, string format, IEnumerable<string> items)
-        // {
-        //     if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(baseUrl));
-
-        //     var output = new LinkBuilder(baseUrl);
-
-        //     return output.AddFormattedLinks(rel, format, items);
-        // }
 
         public static string ToSelfHref(this IEnumerable<Link> links)
         {

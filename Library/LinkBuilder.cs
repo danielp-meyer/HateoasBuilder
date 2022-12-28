@@ -58,7 +58,7 @@ namespace MeyerCorp.HateoasBuilder
                 var relativeurl = p.Item2.GetUrl(encode);
 
                 url.Append(baseUrl);
-                if (String.IsNullOrWhiteSpace(relativeurl)) url.AppendFormat("/{0}", relativeurl);
+                if (!String.IsNullOrWhiteSpace(relativeurl)) url.AppendFormat("/{0}", relativeurl);
 
                 return new Link(p.Item1, url.ToString());
             });
@@ -105,32 +105,26 @@ namespace MeyerCorp.HateoasBuilder
             LastIgnored = !condition;
 
             return condition
-                ? AddQueryLink(relLabel, relativeUrl, relativeUrl, queryPairs)
+                ? AddQueryLink(relLabel, relativeUrl, queryPairs)
                 : this;
         }
 
-        public LinkBuilder AddRouteLink(string relLabel, string relativeUrl, params object[] routeItems)
+        public LinkBuilder AddRouteLink(string relLabel, params object[] routeItems)
         {
-            if (routeItems.Any(ri => ri == null)) throw new ArgumentException($"No elements in the collection can be null.", nameof(routeItems));
+            if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
+            if (routeItems.Length > 1 && routeItems.Any(ri => ri == null)) throw new ArgumentException($"No elements in the collection can be null.", nameof(routeItems));
 
-            var items = routeItems.Select(ri => ri?.ToString());
-            var route = items.Count() > 0
-                ? String.Join('/', items)
-                : null;
+            RelHrefPairs.AddRouteLink(relLabel, routeItems);
 
-            var url = String.IsNullOrWhiteSpace(relativeUrl)
-                ? String.Empty
-                : String.Concat(relativeUrl, '/');
-
-            return AddLink(relLabel, String.Concat(relativeUrl, route));
+            return this;
         }
 
-        public LinkBuilder AddRouteLink(bool condition, string relLabel, string relativeUrl, params object[] routeItems)
+        public LinkBuilder AddRouteLink(bool condition, string relLabel, params object[] routeItems)
         {
             LastIgnored = !condition;
 
             return condition
-                ? AddRouteLink(relLabel, relativeUrl, routeItems)
+                ? AddRouteLink(relLabel, routeItems)
                 : this;
         }
 
@@ -168,33 +162,7 @@ namespace MeyerCorp.HateoasBuilder
             {
                 if (queryPairs == null) throw new ArgumentNullException(nameof(queryPairs));
 
-                var query = new StringBuilder();
-
-                for (var index = 0; index < queryPairs.Length; index += 2)
-                {
-                    var first = queryPairs[index]?.ToString().Trim();
-                    var second = queryPairs.Length > index + 1
-                        ? queryPairs[index + 1]?.ToString().Trim()
-                        : null;
-
-                    query.Append($"{first}={second}&");
-                }
-
-                var queries = query.ToString().Length > 0
-                    ? query.ToString().Trim('&')
-                    : String.Empty;
-
-                if (RelHrefPairs.Count < 1)
-                    throw new InvalidOperationException("At least one link must be added before query parameters can be added.");
-                else
-                {
-                    var rel = RelHrefPairs.Last().Item1;
-                    var href = RelHrefPairs.Last().Item2;
-
-                    RelHrefPairs.RemoveAt(RelHrefPairs.Count - 1);
-
-                    AddLink(rel, String.Concat(href, '?', queries));
-                }
+                RelHrefPairs.Last().Item2.QueryItems.AddRange(queryPairs);
             }
 
             return this;
