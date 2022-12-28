@@ -6,7 +6,7 @@
     <AssemblyName>MeyerCorp.HateoasBuilder</AssemblyName>
     <RootNamespace>MeyerCorp.HateoasBuilder</RootNamespace>
     <PackageId>MeyerCorp.HateoasBuilder</PackageId>
-    <Version>1.4.0-preview-6</Version>
+    <Version>1.5.0-preview-7</Version>
     <Authors>danielpmeyer</Authors>
     <Company>MeyerCorporation</Company>
     <Description>Extension based builder for creating HATEOAS links in RESTful reponses in .NET.</Description>
