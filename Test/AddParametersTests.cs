@@ -6,7 +6,7 @@ namespace MeyerCorp.HateoasBuilder.Test
 {
     public class AddParametersTests : ExtensionTest
     {
-        [Theory(DisplayName = "HttpContext.AddLink (pass)")]
+        [Theory(DisplayName = "HttpContext.AddLink.AddParameters (pass)")]
         [InlineData(true)]
         [InlineData(false)]
         public void AddParametersToAddLinkTrueTest(bool condition)
@@ -23,7 +23,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(rel, links.First().Rel);
         }
 
-        [Theory(DisplayName = "HttpContext.AddLink (pass)")]
+        [Theory(DisplayName = "HttpContext.AddRouteLink.AddParameters (pass)")]
         [InlineData(true)]
         [InlineData(false)]
         public void AddParametersToAddRouteLinkTrueTest(bool condition)
@@ -40,7 +40,7 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(rel, links.First().Rel);
         }
 
-        [Theory(DisplayName = "HttpContext.AddQueryLink (pass)")]
+        [Theory(DisplayName = "HttpContext.AddQueryLink.AddParameters (pass)")]
         [InlineData(true)]
         [InlineData(false)]
         public void AddParametersToAddQueryLinkTrueTest(bool condition)

@@ -43,9 +43,9 @@ namespace MeyerCorp.HateoasBuilder.Test
         [Theory(DisplayName = "String.AddLink false (pass)")]
         [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", false, 1, "dingle/ball?value1=1&value2=2")]
         [InlineData("https://foo.bar/dingle", true, 1, "dingle")]
-        // [InlineData("https://foo.bar", false, null)]
-        // [InlineData("https://foo.bar", false, "")]
-        // [InlineData("https://foo.bar", false, "\t")]
+        [InlineData("https://foo.bar", false, 1, null)]
+        [InlineData("https://foo.bar", false, 1, "")]
+        [InlineData("https://foo.bar", false, 1, "\t")]
         public void AddLinkStringFalsePassTest(string result, bool condition, int count, string relativeUrl)
         {
             var links = baseUrl
