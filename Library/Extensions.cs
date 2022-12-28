@@ -14,6 +14,16 @@ namespace MeyerCorp.HateoasBuilder
             list.Add(new Tuple<string, string?>(rel, rawRelativeUrl));
         }
 
+        internal static string ToBaseUrl(this HttpContext httpContext)
+        {
+            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+
+            var request = httpContext.Request;
+            var baseurl = $"{request.Scheme}://{request.Host}";
+
+            return baseurl;
+        }
+
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
         /// </summary>
@@ -27,6 +37,18 @@ namespace MeyerCorp.HateoasBuilder
             var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
 
             return new LinkBuilder(url, rel, rawRelativeUrl);
+        }
+
+        public static LinkBuilder AddLink(this string baseUrl, bool condition, string relLabel, string? rawRelativeUrl)
+        {
+            if (condition)
+                return baseUrl.AddLink(relLabel, rawRelativeUrl);
+            else
+            {
+                var url = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
+
+                return new LinkBuilder(url);
+            }
         }
 
         /// <summary>
@@ -46,6 +68,19 @@ namespace MeyerCorp.HateoasBuilder
             return baseurl.AddLink(relLabel, rawRelativeUrl);
         }
 
+        public static LinkBuilder AddLink(this HttpContext httpContext, bool condition, string relLabel, string? rawRelativeUrl)
+        {
+
+            if (condition)
+                return httpContext.AddLink(relLabel, rawRelativeUrl);
+            else
+            {
+                if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+
+                return new LinkBuilder(httpContext);
+            }
+        }
+
         public static LinkBuilder AddFormattedLink(this string baseUrl, string relLabel, string relPathFormat, params object[] formatItems)
         {
             return baseUrl.AddLink(relLabel, String.Format(relPathFormat, formatItems));
@@ -58,6 +93,20 @@ namespace MeyerCorp.HateoasBuilder
             return httpContext.AddLink(relLabel, String.Format(relPathFormat, formatItems));
         }
 
+        public static LinkBuilder AddFormattedLink(this string baseUrl, bool condition, string relLabel, string relPathFormat, params object[] formatItems)
+        {
+            return condition
+                ? baseUrl.AddLink(relLabel, String.Format(relPathFormat, formatItems))
+                : new LinkBuilder(baseUrl);
+        }
+
+        public static LinkBuilder AddFormattedLink(this HttpContext httpContext, bool condition, string relLabel, string relPathFormat, params object[] formatItems)
+        {
+            return condition
+                ? httpContext.AddFormattedLink(relLabel, relPathFormat, formatItems)
+                : new LinkBuilder(httpContext);
+        }
+
         public static LinkBuilder AddQueryLink(this string baseUrl, string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return baseUrl.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
@@ -66,6 +115,20 @@ namespace MeyerCorp.HateoasBuilder
         public static LinkBuilder AddQueryLink(this HttpContext httpContext, string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return httpContext.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
+        }
+
+        public static LinkBuilder AddQueryLink(this string baseUrl, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
+        {
+            return condition
+                ? baseUrl.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs)
+                : new LinkBuilder(baseUrl);
+        }
+
+        public static LinkBuilder AddQueryLink(this HttpContext httpContext, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
+        {
+            return condition
+                ? httpContext.AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs)
+                : new LinkBuilder(httpContext);
         }
 
         public static LinkBuilder AddRouteLink(this HttpContext httpContext, string relLabel, params object[] routeItems)
@@ -89,16 +152,19 @@ namespace MeyerCorp.HateoasBuilder
             return baseUrl.AddLink(relLabel, output);
         }
 
-        // public static LinkBuilder AddRouteLink(this string baseUrl, string relLabel, string? relPathFormat = "", params object[] formatItems)
-        // {
-        //     if (String.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(baseUrl));
-        //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
+        public static LinkBuilder AddRouteLink(this HttpContext httpContext, bool condition, string relLabel, params object[] routeItems)
+        {
+            return condition
+                ? httpContext.AddRouteLink(relLabel, routeItems)
+                : new LinkBuilder(httpContext);
+        }
 
-        //     var output = new LinkBuilder(baseUrl);
-
-        //     return output.AddFormattedLink(relLabel, relPathFormat, formatItems);
-        // }
-
+        public static LinkBuilder AddRouteLink(this string baseUrl, bool condition, string relLabel, params object[] routeItems)
+        {
+            return condition
+                ? baseUrl.AddRouteLink(relLabel, routeItems)
+                : new LinkBuilder(baseUrl);
+        }
 
         // public static LinkBuilder AddFormattedLinks(this string baseUrl, string rel, string format, IEnumerable<string> items)
         // {
@@ -148,11 +214,6 @@ namespace MeyerCorp.HateoasBuilder
                 ? hash
                 : hash * seed + value.GetHashCode();
         }
-
-        // public static ArgumentException ToNullOrWhitespace(this string parameterName)
-        // {
-        //     return new ArgumentException("Parameter cannot be null, empty, or whitespace.", parameterName);
-        // }
 
         public static string CheckIfNullOrWhiteSpace(this string value, string parameterName)
         {

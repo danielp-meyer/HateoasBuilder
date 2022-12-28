@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,17 +19,11 @@ namespace MeyerCorp.HateoasBuilder
         /// </summary>
         /// <param name="baseUrl">The base URL which all presented links will use</param>
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        public LinkBuilder(string baseUrl) => BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
+        internal LinkBuilder(string baseUrl) => BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
 
-        public LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
+        internal LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
-        // /// <summary>
-        // /// Link colleciton indexer
-        // /// </summary>
-        // /// <param name="index">Index which to retrieve.</param>
-        // /// <returns>Link object in the collection to return</returns>
-        // [JsonProperty]
-        // public Link this[int index] { get { return Build().ToArray()[index]; } }
+        internal LinkBuilder(HttpContext httpContext) : this(httpContext.ToBaseUrl()) { }
 
         /// <summary>
         /// The base URL which all presented links will use
@@ -44,7 +39,7 @@ namespace MeyerCorp.HateoasBuilder
         /// Build all added links and yield as a collection of links.
         /// </summary>
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        IEnumerable<Link> Build(bool encode)
+        public IEnumerable<Link> Build(bool encode = false)
         {
             return RelHrefPairs
                 .Select(p =>
@@ -57,12 +52,6 @@ namespace MeyerCorp.HateoasBuilder
                     return new Link(p.Item1, href);
                 });
         }
-
-        /// <summary>
-        /// Build all added links and yield as a collection of links.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        public IEnumerable<Link> Build() => Build(false);
 
         /// <summary>
         /// Build all added links and yield as a collection of links all of which are URL encoded.
@@ -78,33 +67,30 @@ namespace MeyerCorp.HateoasBuilder
         /// <returns>This LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public LinkBuilder AddLink(string relLabel, string rawRelativeUrl)
         {
-            relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
-            // rawRelativeUrl.CheckIfNullOrWhiteSpace(nameof(rawRelativeUrl));
+            var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
 
-            RelHrefPairs.Add(relLabel, rawRelativeUrl);
+            RelHrefPairs.Add(rel, rawRelativeUrl);
 
             return this;
         }
 
-        /// <summary>
-        /// Add a link based on a format string and necessary parameters
-        /// </summary>
-        /// <param name="relLabel"></param>
-        /// <param name="relativeUrlFormat"></param>
-        /// <param name="formattedItems"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public LinkBuilder AddFormattedLink(string relLabel, string relativeUrlFormat, params object[] formattedItems)
+        public LinkBuilder AddLink(bool condition, string relLabel, string rawRelativeUrl)
         {
-            if (formattedItems == null) throw new ArgumentNullException(nameof(formattedItems));
-            relativeUrlFormat.CheckIfNullOrWhiteSpace(nameof(relativeUrlFormat));
-
-            return AddLink(relLabel, String.Format(relativeUrlFormat, formattedItems));
+            return condition
+                ? AddLink(relLabel, rawRelativeUrl)
+                : this;
         }
-
+       
         public LinkBuilder AddQueryLink(string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
+        }
+
+        public LinkBuilder AddQueryLink(bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
+        {
+            return condition
+                ? AddQueryLink(relLabel, relativeUrl, relativeUrl, queryPairs)
+                : this;
         }
 
         public LinkBuilder AddRouteLink(string relLabel, string relativeUrl, params object[] routeItems)
@@ -121,6 +107,36 @@ namespace MeyerCorp.HateoasBuilder
                 : String.Concat(relativeUrl, '/');
 
             return AddLink(relLabel, String.Concat(relativeUrl, route));
+        }
+
+        public LinkBuilder AddRouteLink(bool condition, string relLabel, string relativeUrl, params object[] routeItems)
+        {
+            return condition
+                ? AddRouteLink(relLabel, relativeUrl, routeItems)
+                : this;
+        }
+
+        /// <summary>
+        /// Add a link based on a format string and necessary parameters
+        /// </summary>
+        /// <param name="relLabel"></param>
+        /// <param name="relativeUrlFormat"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public LinkBuilder AddFormattedLink(string relLabel, string relativeUrlFormat, params object[] arguments)
+        {
+            if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+            relativeUrlFormat.CheckIfNullOrWhiteSpace(nameof(relativeUrlFormat));
+
+            return AddLink(relLabel, String.Format(relativeUrlFormat, arguments));
+        }
+
+        public LinkBuilder AddFormattedLink(bool condition, string relLabel, string relativeUrlFormat, params object[] arguments)
+        {
+            return condition
+                ? AddFormattedLink(relLabel, relativeUrlFormat, relativeUrlFormat, arguments)
+                : this;
         }
 
         /// <summary>
@@ -183,60 +199,23 @@ namespace MeyerCorp.HateoasBuilder
         //     return this;
         // }
 
-        // /// <summary>
-        // /// Add a link based on a format string and necessary parameters
-        // /// </summary>
-        // /// <param name="relLabel"></param>
-        // /// <param name="relativeUrlFormat"></param>
-        // /// <param name="formattedItems"></param>
-        // /// <returns></returns>
-        // /// <exception cref="ArgumentNullException"></exception>
-        // public LinkBuilder AddFormattedLink(string relLabel, string? relPathFormat = "", params object[] formatItems)
+        // public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
         // {
         //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-        //     if (String.IsNullOrWhiteSpace(relativeUrlFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relativeUrlFormat));
+        //     if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relPathFormat));
+        //     if (items == null) throw new ArgumentNullException(nameof(relPathFormat));
 
-        //     if (formattedItems.Length < 1 && !String.IsNullOrWhiteSpace(relativeUrlFormat))
+        //     if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)
         //     {
-        //         RelHrefPairs.Add(relLabel);
-        //         RelHrefPairs.Add(String.Concat(BaseUrl, relativeUrlFormat));
-        //     }
-        //     else if (formattedItems.Length > 0 && !formattedItems.Any(i => i == null || String.IsNullOrWhiteSpace(i.ToString())))
-        //     {
-        //         RelHrefPairs.Add(relLabel);
-        //         RelHrefPairs.Add(String.Concat(BaseUrl, String.Format(relativeUrlFormat, formattedItems)));
+        //         foreach (var item in items.Where(i => i != null && !String.IsNullOrWhiteSpace(i.ToString())))
+        //         {
+        //             var formatitems = item.Split(',');
+
+        //             AddFormattedLink(relLabel, relPathFormat, formatitems);
+        //         }
         //     }
 
         //     return this;
+        // }
     }
-
-    // public LinkBuilder AddFormattedLinkIf(bool condition, string relLabel, string relPathFormat, params object[] formatItems)
-    // {
-    //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-    //     if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-
-    //     if (condition)
-    //         AddFormattedLink(relLabel, relPathFormat, formatItems);
-
-    //     return this;
-    // }
-
-    // public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
-    // {
-    //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-    //     if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relPathFormat));
-    //     if (items == null) throw new ArgumentNullException(nameof(relPathFormat));
-
-    //     if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)
-    //     {
-    //         foreach (var item in items.Where(i => i != null && !String.IsNullOrWhiteSpace(i.ToString())))
-    //         {
-    //             var formatitems = item.Split(',');
-
-    //             AddFormattedLink(relLabel, relPathFormat, formatitems);
-    //         }
-    //     }
-
-    //     return this;
-    // }
 }
