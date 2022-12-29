@@ -35,10 +35,10 @@ namespace MeyerCorp.HateoasBuilder.Test
         [Fact(DisplayName = "BuildEncoded")]
         public void LinkBuilderBuildTest()
         {
-            var result = baseUrl.AddQueryLink(rel, "base", "test", "?", "test1", "Spa ce").BuildEncoded();
+            var result = baseUrl.AddQueryLink(rel, "relativeUrl", "test", "?", "test1", "Spa ce").BuildEncoded();
 
             Assert.Equal("rel", result.First().Rel);
-            Assert.Equal("https://foo.bar/base%3ftest%3d%3f%26test1%3dSpa+ce", result.First().Href);
+            Assert.Equal("https://foo.bar/relativeUrl%3ftest%3d%3f%26test1%3dSpa+ce", result.First().Href);
         }
 
         [Fact(DisplayName = "Build (not encoded)")]

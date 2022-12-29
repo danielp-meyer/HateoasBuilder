@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +6,9 @@ using System.Text;
 
 namespace MeyerCorp.HateoasBuilder
 {
+    /// <summary>
+    /// Object used to create a collection of HATEOAS links for API endpoints.
+    /// </summary>
     public class LinkBuilder
     {
         private string baseUrl = default!;
@@ -21,17 +23,26 @@ namespace MeyerCorp.HateoasBuilder
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
         internal LinkBuilder(string baseUrl) => BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="lastIgnored"></param>
+        /// <param name="baseUrl">Base URL</param>
+        /// <exception cref="ArgumentException"><paramref name="baseUrl"/> cannot be null, empty, or whitespace.</exception>
         internal LinkBuilder(bool lastIgnored, string baseUrl)
         {
             BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
-            this.LastIgnored = lastIgnored;
+            LastIgnored = lastIgnored;
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="baseUrl">Base URL</param>
+        /// <param name="relLabel">Rel label for first link.</param>
+        /// <param name="rawRelativeUrl">Relative URL for the first link.</param>
+        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
         internal LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
-
-        // internal LinkBuilder(HttpContext httpContext) : this(httpContext.ToBaseUrl()) { }
-
-        internal LinkBuilder(bool lastIgnored, HttpContext httpContext) : this(lastIgnored, httpContext.ToBaseUrl()) { }
 
         /// <summary>
         /// The base URL which all presented links will use
@@ -43,13 +54,16 @@ namespace MeyerCorp.HateoasBuilder
             private set => baseUrl = value;
         }
 
+        /// <summary>
+        /// Set when the last link added was conditionally ignored so that any AddParameter calls made after this are ignored as well.
+        /// </summary>
         [JsonIgnore]
         internal bool LastIgnored { get; set; } = false;
 
         /// <summary>
         /// Build all added links and yield as a collection of links.
         /// </summary>
-        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
+        /// <param name="encode">URL encode output if true.</param>
         public IEnumerable<Link> Build(bool encode = false)
         {
             return RelHrefPairs.Select(p =>
@@ -67,7 +81,6 @@ namespace MeyerCorp.HateoasBuilder
         /// <summary>
         /// Build all added links and yield as a collection of links all of which are URL encoded.
         /// </summary>
-        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
         public IEnumerable<Link> BuildEncoded() => Build(true);
 
         /// <summary>
@@ -78,14 +91,18 @@ namespace MeyerCorp.HateoasBuilder
         /// <returns>This LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public LinkBuilder AddLink(string relLabel, string rawRelativeUrl)
         {
-            var rel = relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
-
             LastIgnored = false;
-            RelHrefPairs.Add(rel, rawRelativeUrl);
+            RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
             return this;
         }
 
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="rawRelativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public LinkBuilder AddLink(bool condition, string relLabel, string rawRelativeUrl)
         {
             LastIgnored = !condition;
@@ -95,11 +112,32 @@ namespace MeyerCorp.HateoasBuilder
                 : this;
         }
 
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public LinkBuilder AddQueryLink(string relLabel, string relativeUrl, params object[] queryPairs)
         {
             return AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
         }
 
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="condition">Condition on which to ignore adding this new link.</param>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        /// <remarks>
+        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
+        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
+        /// to ignore adding the link when page 1. 
+        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
+        /// </remarks>
         public LinkBuilder AddQueryLink(bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
         {
             LastIgnored = !condition;
@@ -109,6 +147,18 @@ namespace MeyerCorp.HateoasBuilder
                 : this;
         }
 
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="routeItems">Items which will be concatenated with delimiting slashes to create a route after the base URL.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        /// <remarks>
+        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
+        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
+        /// to ignore adding the link when page 1. 
+        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
+        /// </remarks>
         public LinkBuilder AddRouteLink(string relLabel, params object[] routeItems)
         {
             if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
@@ -119,6 +169,19 @@ namespace MeyerCorp.HateoasBuilder
             return this;
         }
 
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="condition">Condition on which to ignore adding this new link.</param>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="routeItems">Items which will be concatenated with delimiting slashes to create a route after the base URL.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        /// <remarks>
+        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
+        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
+        /// to ignore adding the link when page 1. 
+        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
+        /// </remarks>
         public LinkBuilder AddRouteLink(bool condition, string relLabel, params object[] routeItems)
         {
             LastIgnored = !condition;
@@ -144,6 +207,14 @@ namespace MeyerCorp.HateoasBuilder
             return AddLink(relLabel, String.Format(relativeUrlFormat, arguments));
         }
 
+        /// <summary>
+        /// Add a link based on a format string and necessary parameters
+        /// </summary>
+        /// <param name="relLabel"></param>
+        /// <param name="relativeUrlFormat"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public LinkBuilder AddFormattedLink(bool condition, string relLabel, string relativeUrlFormat, params object[] arguments)
         {
             LastIgnored = !condition;
@@ -156,6 +227,10 @@ namespace MeyerCorp.HateoasBuilder
         /// <summary>
         /// Add a list of parameters to the end of the last URL added to the list of links.
         /// </summary>
+        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
+        /// <returns>This Link Builder.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <remarks>This will be ignore and not run if the previous Add Link method that it run on was ignore because of a conditional parameter.</remarks>
         public LinkBuilder AddParameters(params object[] queryPairs)
         {
             if (!LastIgnored)
