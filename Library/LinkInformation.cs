@@ -7,14 +7,20 @@ namespace MeyerCorp.HateoasBuilder
 {
     internal class LinkInformation
     {
+        const string GET = "GET";
+        
         readonly string RelativeUrl = String.Empty;
+        readonly string _Method = GET;
 
-        internal LinkInformation(string? rawRelativeUrl)
+        private LinkInformation(string method = GET)=>Method = method;
+
+        internal LinkInformation(string? rawRelativeUrl, string method = GET):this(method)
         {
             RelativeUrl = rawRelativeUrl?.Trim() ?? String.Empty;
         }
 
-        internal LinkInformation(IEnumerable<object>? routeItems, IEnumerable<object>? queryItems)
+        internal LinkInformation(IEnumerable<object>? routeItems, IEnumerable<object>? queryItems, string method = GET):
+            this(method)
         {
             if (routeItems != null) RouteItems.AddRange(routeItems);
             if (queryItems != null) QueryItems.AddRange(queryItems);
@@ -22,6 +28,12 @@ namespace MeyerCorp.HateoasBuilder
 
         internal List<object> RouteItems { get; } = new List<object>();
         internal List<object> QueryItems { get; } = new List<object>();
+
+        internal string Method
+        {
+            get => _Method;
+            set => value.Trim().ToUpperInvariant();
+        }
 
         internal string GetUrl(bool encode)
         {

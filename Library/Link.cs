@@ -4,27 +4,31 @@ namespace MeyerCorp.HateoasBuilder
 {
     public class Link
     {
+        const string GET = "GET";
+
         [Required]
         public string Rel { get; } = default!;
 
         [Required]
         public string Href { get; } = default!;
 
-        public Link(string relLabel, string href)
+        public string Method { get; } = GET;
+
+        public Link(string relLabel, string href, string method = GET)
         {
             Rel = relLabel;
             Href = href;
+            Method = method;
         }
 
         public override bool Equals(object obj)
         {
-            var value = obj as Link;
-
-            if (value == null)
+            if (!(obj is Link value))
                 return false;
             else
                 return value.Rel == Rel
-                    && value.Href == Href;
+                    && value.Href == Href
+                    && value.Method == Method;
         }
 
         public override int GetHashCode()
@@ -36,7 +40,7 @@ namespace MeyerCorp.HateoasBuilder
 
         public override string ToString()
         {
-            return $"{Rel}: {Href}";
+            return $"{Rel}-> {Method}: {Href}";
         }
     }
 }
