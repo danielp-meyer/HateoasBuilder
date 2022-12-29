@@ -10,7 +10,6 @@ namespace MeyerCorp.HateoasBuilder.Test
         protected const string rel = "rel";
         protected const string baseUrl = "https://foo.bar";
 
-
         protected static TestHttpContext GetHttpContext()
         {
             return new TestHttpContext(new TestHttpRequest
