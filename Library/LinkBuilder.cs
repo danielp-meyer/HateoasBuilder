@@ -6,29 +6,43 @@ using System.Text;
 
 namespace MeyerCorp.HateoasBuilder
 {
+    /// <summary>
+    /// Object used to create a collection of HATEOAS links for API endpoints.
+    /// </summary>
     public class LinkBuilder
     {
         private string baseUrl = default!;
 
         [JsonIgnore]
-        List<Tuple<string, string?>> RelHrefPairs { get; set; } = new List<Tuple<string, string?>>();
+        List<Tuple<string, LinkInformation>> RelHrefPairs { get; set; } = new List<Tuple<string, LinkInformation>>();
 
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="baseUrl">The base URL which all presented links will use</param>
         /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        public LinkBuilder(string baseUrl) => BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
+        internal LinkBuilder(string baseUrl) => BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
 
-        public LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="lastIgnored"></param>
+        /// <param name="baseUrl">Base URL</param>
+        /// <exception cref="ArgumentException"><paramref name="baseUrl"/> cannot be null, empty, or whitespace.</exception>
+        internal LinkBuilder(bool lastIgnored, string baseUrl)
+        {
+            BaseUrl = baseUrl.CheckIfNullOrWhiteSpace(nameof(baseUrl));
+            LastIgnored = lastIgnored;
+        }
 
-        // /// <summary>
-        // /// Link colleciton indexer
-        // /// </summary>
-        // /// <param name="index">Index which to retrieve.</param>
-        // /// <returns>Link object in the collection to return</returns>
-        // [JsonProperty]
-        // public Link this[int index] { get { return Build().ToArray()[index]; } }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="baseUrl">Base URL</param>
+        /// <param name="relLabel">Rel label for first link.</param>
+        /// <param name="rawRelativeUrl">Relative URL for the first link.</param>
+        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
+        internal LinkBuilder(string baseUrl, string relLabel, string? rawRelativeUrl) : this(baseUrl) => RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
         /// <summary>
         /// The base URL which all presented links will use
@@ -41,33 +55,32 @@ namespace MeyerCorp.HateoasBuilder
         }
 
         /// <summary>
-        /// Build all added links and yield as a collection of links.
+        /// Set when the last link added was conditionally ignored so that any AddParameter calls made after this are ignored as well.
         /// </summary>
-        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        IEnumerable<Link> Build(bool encode)
-        {
-            return RelHrefPairs
-                .Select(p =>
-                {
-                    var relativeurl = encode
-                        ? System.Web.HttpUtility.UrlEncode(p.Item2?.Trim())
-                        : p.Item2?.Trim();
-                    var href = String.Concat(BaseUrl, '/', relativeurl).Trim('/');
-
-                    return new Link(p.Item1, href);
-                });
-        }
+        [JsonIgnore]
+        internal bool LastIgnored { get; set; } = false;
 
         /// <summary>
         /// Build all added links and yield as a collection of links.
         /// </summary>
-        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
-        public IEnumerable<Link> Build() => Build(false);
+        /// <param name="encode">URL encode output if true.</param>
+        public IEnumerable<Link> Build(bool encode = false)
+        {
+            return RelHrefPairs.Select(p =>
+            {
+                var url = new StringBuilder();
+                var relativeurl = p.Item2.GetUrl(encode);
+
+                url.Append(baseUrl);
+                if (!String.IsNullOrWhiteSpace(relativeurl)) url.AppendFormat("/{0}", relativeurl);
+
+                return new Link(p.Item1, url.ToString());
+            });
+        }
 
         /// <summary>
         /// Build all added links and yield as a collection of links all of which are URL encoded.
         /// </summary>
-        /// <exception cref="ArgumentNullException">The <paramref name="baseUrl"/> must not be null, empty, or whitespace.</exception>
         public IEnumerable<Link> BuildEncoded() => Build(true);
 
         /// <summary>
@@ -78,12 +91,104 @@ namespace MeyerCorp.HateoasBuilder
         /// <returns>This LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public LinkBuilder AddLink(string relLabel, string rawRelativeUrl)
         {
-            relLabel.CheckIfNullOrWhiteSpace(nameof(relLabel));
-            // rawRelativeUrl.CheckIfNullOrWhiteSpace(nameof(rawRelativeUrl));
-
+            LastIgnored = false;
             RelHrefPairs.Add(relLabel, rawRelativeUrl);
 
             return this;
+        }
+
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="rawRelativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        public LinkBuilder AddLink(bool condition, string relLabel, string rawRelativeUrl)
+        {
+            LastIgnored = !condition;
+
+            return condition
+                ? AddLink(relLabel, rawRelativeUrl)
+                : this;
+        }
+
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        public LinkBuilder AddQueryLink(string relLabel, string relativeUrl, params object[] queryPairs)
+        {
+            return AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
+        }
+
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="condition">Condition on which to ignore adding this new link.</param>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
+        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        /// <remarks>
+        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
+        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
+        /// to ignore adding the link when page 1. 
+        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
+        /// </remarks>
+        public LinkBuilder AddQueryLink(bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
+        {
+            LastIgnored = !condition;
+
+            return condition
+                ? AddQueryLink(relLabel, relativeUrl, queryPairs)
+                : this;
+        }
+
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="routeItems">Items which will be concatenated with delimiting slashes to create a route after the base URL.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        /// <remarks>
+        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
+        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
+        /// to ignore adding the link when page 1. 
+        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
+        /// </remarks>
+        public LinkBuilder AddRouteLink(string relLabel, params object[] routeItems)
+        {
+            if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
+            if (routeItems.Length > 1 && routeItems.Any(ri => ri == null)) throw new ArgumentException($"No elements in the collection can be null.", nameof(routeItems));
+
+            RelHrefPairs.AddRouteLink(relLabel, routeItems);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
+        /// </summary>
+        /// <param name="condition">Condition on which to ignore adding this new link.</param>
+        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
+        /// <param name="routeItems">Items which will be concatenated with delimiting slashes to create a route after the base URL.</param>
+        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
+        /// <remarks>
+        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
+        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
+        /// to ignore adding the link when page 1. 
+        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
+        /// </remarks>
+        public LinkBuilder AddRouteLink(bool condition, string relLabel, params object[] routeItems)
+        {
+            LastIgnored = !condition;
+
+            return condition
+                ? AddRouteLink(relLabel, routeItems)
+                : this;
         }
 
         /// <summary>
@@ -91,71 +196,48 @@ namespace MeyerCorp.HateoasBuilder
         /// </summary>
         /// <param name="relLabel"></param>
         /// <param name="relativeUrlFormat"></param>
-        /// <param name="formattedItems"></param>
+        /// <param name="arguments"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public LinkBuilder AddFormattedLink(string relLabel, string relativeUrlFormat, params object[] formattedItems)
+        public LinkBuilder AddFormattedLink(string relLabel, string relativeUrlFormat, params object[] arguments)
         {
-            if (formattedItems == null) throw new ArgumentNullException(nameof(formattedItems));
+            if (arguments == null) throw new ArgumentNullException(nameof(arguments));
             relativeUrlFormat.CheckIfNullOrWhiteSpace(nameof(relativeUrlFormat));
 
-            return AddLink(relLabel, String.Format(relativeUrlFormat, formattedItems));
+            return AddLink(relLabel, String.Format(relativeUrlFormat, arguments));
         }
 
-        public LinkBuilder AddQueryLink(string relLabel, string relativeUrl, params object[] queryPairs)
+        /// <summary>
+        /// Add a link based on a format string and necessary parameters
+        /// </summary>
+        /// <param name="relLabel"></param>
+        /// <param name="relativeUrlFormat"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public LinkBuilder AddFormattedLink(bool condition, string relLabel, string relativeUrlFormat, params object[] arguments)
         {
-            return AddRouteLink(relLabel, relativeUrl).AddParameters(queryPairs);
-        }
+            LastIgnored = !condition;
 
-        public LinkBuilder AddRouteLink(string relLabel, string relativeUrl, params object[] routeItems)
-        {
-            if (routeItems.Any(ri => ri == null)) throw new ArgumentException($"No elements in the collection can be null.", nameof(routeItems));
-
-            var items = routeItems.Select(ri => ri?.ToString());
-            var route = items.Count() > 0
-                ? String.Join('/', items)
-                : null;
-
-            var url = String.IsNullOrWhiteSpace(relativeUrl)
-                ? String.Empty
-                : String.Concat(relativeUrl, '/');
-
-            return AddLink(relLabel, String.Concat(relativeUrl, route));
+            return condition
+                 ? AddFormattedLink(relLabel, relativeUrlFormat, relativeUrlFormat, arguments)
+                 : this;
         }
 
         /// <summary>
         /// Add a list of parameters to the end of the last URL added to the list of links.
         /// </summary>
+        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
+        /// <returns>This Link Builder.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <remarks>This will be ignore and not run if the previous Add Link method that it run on was ignore because of a conditional parameter.</remarks>
         public LinkBuilder AddParameters(params object[] queryPairs)
         {
-            if (queryPairs == null) throw new ArgumentNullException(nameof(queryPairs));
-
-            var query = new StringBuilder();
-
-            for (var index = 0; index < queryPairs.Length; index += 2)
+            if (!LastIgnored)
             {
-                var first = queryPairs[index]?.ToString().Trim();
-                var second = queryPairs.Length > index + 1
-                    ? queryPairs[index + 1]?.ToString().Trim()
-                    : null;
+                if (queryPairs == null) throw new ArgumentNullException(nameof(queryPairs));
 
-                query.Append($"{first}={second}&");
-            }
-
-            var queries = query.ToString().Length > 0
-                ? query.ToString().Trim('&')
-                : String.Empty;
-
-            if (RelHrefPairs.Count < 1)
-                throw new InvalidOperationException("At least one link must be added before query parameters can be added.");
-            else
-            {
-                var rel = RelHrefPairs.Last().Item1;
-                var href = RelHrefPairs.Last().Item2;
-
-                RelHrefPairs.RemoveAt(RelHrefPairs.Count - 1);
-
-                AddLink(rel, String.Concat(href, '?', queries));
+                RelHrefPairs.Last().Item2.QueryItems.AddRange(queryPairs);
             }
 
             return this;
@@ -183,60 +265,23 @@ namespace MeyerCorp.HateoasBuilder
         //     return this;
         // }
 
-        // /// <summary>
-        // /// Add a link based on a format string and necessary parameters
-        // /// </summary>
-        // /// <param name="relLabel"></param>
-        // /// <param name="relativeUrlFormat"></param>
-        // /// <param name="formattedItems"></param>
-        // /// <returns></returns>
-        // /// <exception cref="ArgumentNullException"></exception>
-        // public LinkBuilder AddFormattedLink(string relLabel, string? relPathFormat = "", params object[] formatItems)
+        // public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
         // {
         //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-        //     if (String.IsNullOrWhiteSpace(relativeUrlFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relativeUrlFormat));
+        //     if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relPathFormat));
+        //     if (items == null) throw new ArgumentNullException(nameof(relPathFormat));
 
-        //     if (formattedItems.Length < 1 && !String.IsNullOrWhiteSpace(relativeUrlFormat))
+        //     if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)
         //     {
-        //         RelHrefPairs.Add(relLabel);
-        //         RelHrefPairs.Add(String.Concat(BaseUrl, relativeUrlFormat));
-        //     }
-        //     else if (formattedItems.Length > 0 && !formattedItems.Any(i => i == null || String.IsNullOrWhiteSpace(i.ToString())))
-        //     {
-        //         RelHrefPairs.Add(relLabel);
-        //         RelHrefPairs.Add(String.Concat(BaseUrl, String.Format(relativeUrlFormat, formattedItems)));
+        //         foreach (var item in items.Where(i => i != null && !String.IsNullOrWhiteSpace(i.ToString())))
+        //         {
+        //             var formatitems = item.Split(',');
+
+        //             AddFormattedLink(relLabel, relPathFormat, formatitems);
+        //         }
         //     }
 
         //     return this;
+        // }
     }
-
-    // public LinkBuilder AddFormattedLinkIf(bool condition, string relLabel, string relPathFormat, params object[] formatItems)
-    // {
-    //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-    //     if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-
-    //     if (condition)
-    //         AddFormattedLink(relLabel, relPathFormat, formatItems);
-
-    //     return this;
-    // }
-
-    // public LinkBuilder AddFormattedLinks(string relLabel, string relPathFormat, IEnumerable<string> items)
-    // {
-    //     if (String.IsNullOrWhiteSpace(relLabel)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relLabel));
-    //     if (String.IsNullOrWhiteSpace(relPathFormat)) throw new ArgumentException("Parameter cannot be null, empty, or whitespace.", nameof(relPathFormat));
-    //     if (items == null) throw new ArgumentNullException(nameof(relPathFormat));
-
-    //     if (!String.IsNullOrWhiteSpace(relPathFormat) && items != null)
-    //     {
-    //         foreach (var item in items.Where(i => i != null && !String.IsNullOrWhiteSpace(i.ToString())))
-    //         {
-    //             var formatitems = item.Split(',');
-
-    //             AddFormattedLink(relLabel, relPathFormat, formatitems);
-    //         }
-    //     }
-
-    //     return this;
-    // }
 }

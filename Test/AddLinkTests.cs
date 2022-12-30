@@ -62,6 +62,23 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(rel, links.First().Rel);
         }
 
+        [Theory(DisplayName = "String.AddLink false (pass)")]
+        [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", false, 1, "dingle/ball?value1=1&value2=2")]
+        [InlineData("https://foo.bar/dingle", true, 1, "dingle")]
+        [InlineData("https://foo.bar", false, 1, null)]
+        [InlineData("https://foo.bar", false, 1, "")]
+        [InlineData("https://foo.bar", false, 1, "\t")]
+        public void AddLinkStringFalsePassTest(string result, bool condition, int count, string relativeUrl)
+        {
+            var links = baseUrl
+                .AddLink(condition, rel, relativeUrl)
+                .AddLink(!condition, rel, relativeUrl)
+                .Build();
+
+            Assert.Equal(count, links.Count());
+            if (count > 0) Assert.Equal(new Link(rel, result), links.First());
+        }
+
         [Theory(DisplayName = "HttpContext.AddLink (fail)")]
         [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relLabel')", null, "dingle/ball?value1=1&value2=2")]
         [InlineData("Parameter cannot be null, empty, or whitespace. (Parameter 'relLabel')", "", "dingle")]
