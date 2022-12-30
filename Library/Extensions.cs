@@ -1,4 +1,3 @@
-﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ namespace MeyerCorp.HateoasBuilder
     /// <summary>
     /// Methods for starting the HateoasBuilder call chain optimized for Web API and Azure Functions-based applications.
     /// </summary>
-    public static class Extensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Add a new item to the Tuple collection automatically adding the <param name="rawRelativeUrl"/> to a new LinkInformation object.
@@ -63,22 +62,6 @@ namespace MeyerCorp.HateoasBuilder
         }
 
         /// <summary>
-        /// Extract the base URL from the HTTP context object of a Web API controller.
-        /// </summary>
-        /// <param name="httpContext">HTTP context object of a Web API controller.</param>
-        /// <returns>String representing the base URL</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="httpContext"/> cannot be null</exception>
-        internal static string ToBaseUrl(this HttpContext httpContext)
-        {
-            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
-
-            var request = httpContext.Request;
-            var baseurl = $"{request.Scheme}://{request.Host}";
-
-            return baseurl;
-        }
-
-        /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
         /// </summary>
         /// <param name="baseUrl">The base URL to use for all links added to the Link Builder.</param>
@@ -107,53 +90,11 @@ namespace MeyerCorp.HateoasBuilder
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
         /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="condition">Condition on which to ignore adding this new link.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="rawRelativeUrl">The hypertext link indicating where more data can be found.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        /// <remarks>
-        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
-        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
-        /// to ignore adding the link when page 1. 
-        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
-        /// </remarks>
-        public static LinkBuilder AddLink(this HttpContext httpContext, bool condition, string relLabel, string? rawRelativeUrl)
-        {
-            return httpContext
-                .ToBaseUrl()
-                .AddLink(condition, relLabel, rawRelativeUrl);
-        }
-
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
         /// <param name="baseUrl">Value for the base URL for the new link builder object.</param>
         /// <param name="relLabel">The label which will be used for the hyperlink.</param>
         /// <param name="rawRelativeUrl">The hypertext link indicating where more data can be found.</param>
         /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
         public static LinkBuilder AddLink(this string baseUrl, string relLabel, string? rawRelativeUrl) => baseUrl.AddLink(true, relLabel, rawRelativeUrl);
-
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="rawRelativeUrl">The hypertext link indicating where more data can be found.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddLink(this HttpContext httpContext, string relLabel, string? rawRelativeUrl) => httpContext.AddLink(true, relLabel, rawRelativeUrl);
-
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="routeItems">Items which will be concatenated with delimiting slashes to create a route after the base URL.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddRouteLink(this HttpContext httpContext, string relLabel, params object[] routeItems)
-        {
-            return httpContext.ToBaseUrl().AddRouteLink(true, relLabel, routeItems);
-        }
 
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
@@ -165,25 +106,6 @@ namespace MeyerCorp.HateoasBuilder
         public static LinkBuilder AddRouteLink(this string baseUrl, string relLabel, params object[] routeItems)
         {
             return baseUrl.AddRouteLink(true, relLabel, routeItems);
-        }
-
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="condition">Condition on which to ignore adding this new link.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="routeItems">Items which will be concatenated with delimiting slashes to create a route after the base URL.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        /// <remarks>
-        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
-        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
-        /// to ignore adding the link when page 1. 
-        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
-        /// </remarks>
-        public static LinkBuilder AddRouteLink(this HttpContext httpContext, bool condition, string relLabel, params object[] routeItems)
-        {
-            return httpContext.ToBaseUrl().AddRouteLink(condition, relLabel, routeItems);
         }
 
         /// <summary>
@@ -225,19 +147,6 @@ namespace MeyerCorp.HateoasBuilder
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
         /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
-        /// <param name="queryPairs">Values which will be concatenated as a query parameter list for the URL of the last link added.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddQueryLink(this HttpContext httpContext, string relLabel, string relativeUrl, params object[] queryPairs)
-        {
-            return httpContext.AddQueryLink(true, relLabel, relativeUrl, queryPairs);
-        }
-
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
         /// <param name="baseUrl">Value for the base URL for the new link builder object.</param>
         /// <param name="condition">Condition on which to ignore adding this new link.</param>
         /// <param name="relLabel">The label which will be used for the hyperlink.</param>
@@ -255,25 +164,6 @@ namespace MeyerCorp.HateoasBuilder
             return baseUrl.AddRouteLink(condition, relLabel, relativeUrl).AddParameters(queryPairs);
         }
 
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="condition">Condition on which to ignore adding this new link.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="relativeUrl">The hypertext link indicating where more data can be found.</param>
-        /// <param name="queryPairs">Collection of values for the format string.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        /// <remarks>
-        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
-        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
-        /// to ignore adding the link when page 1. 
-        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
-        /// </remarks>
-        public static LinkBuilder AddQueryLink(this HttpContext httpContext, bool condition, string relLabel, string relativeUrl, params object[] queryPairs)
-        {
-            return httpContext.ToBaseUrl().AddQueryLink(condition, relLabel, relativeUrl, queryPairs);
-        }
 
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
@@ -288,18 +178,6 @@ namespace MeyerCorp.HateoasBuilder
             return baseUrl.AddFormattedLink(true, relLabel, relPathFormat, formatItems);
         }
 
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="relPathFormat">A format string template which the resulting URL will be based.</param>
-        /// <param name="formatItems">Collection of values for the format string.</param>
-        /// <returns>A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        public static LinkBuilder AddFormattedLink(this HttpContext httpContext, string relLabel, string relPathFormat, params object[] formatItems)
-        {
-            return httpContext.ToBaseUrl().AddFormattedLink(relLabel, relPathFormat, formatItems);
-        }
 
         /// <summary>
         /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
@@ -321,26 +199,6 @@ namespace MeyerCorp.HateoasBuilder
             return baseUrl.AddLink(condition, relLabel, String.Format(relPathFormat, formatItems));
         }
 
-        /// <summary>
-        /// Create a name and hyperlink pair based on the current HttpContext which can be added to an API's HTTP response.
-        /// </summary>
-        /// <param name="httpContext">The current HttpContext in an Web API controller.</param>
-        /// <param name="condition">Condition on which to ignore adding this new link.</param>
-        /// <param name="relLabel">The label which will be used for the hyperlink.</param>
-        /// <param name="relPathFormat">A format string template which the resulting URL will be based.</param>
-        /// <param name="formatItems">Collection of values for the format string.</param>
-        /// <returns>
-        /// A LinkBuilder object which can be used to add more links before calling the Build method.</returns>
-        /// <remarks>
-        /// Use the <paramref name="condition"/> to decide whether to ignore adding this new link.
-        /// For example, when considering pagination, you might consider checking whether you're on page one and so`you'll want
-        /// to ignore adding the link when page 1. 
-        /// <code>HttpContext.AddLink(page==1, "next",...);</code> 
-        /// </remarks>
-        public static LinkBuilder AddFormattedLink(this HttpContext httpContext, bool condition, string relLabel, string relPathFormat, params object[] formatItems)
-        {
-            return httpContext.ToBaseUrl().AddFormattedLink(condition, relLabel, relPathFormat, formatItems);
-        }
 
         /// <summary>
         /// Find the URL for a "self" rel label in a list of links.

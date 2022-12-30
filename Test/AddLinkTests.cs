@@ -23,6 +23,28 @@ namespace MeyerCorp.HateoasBuilder.Test
             Assert.Equal(rel, links.First().Rel);
         }
 
+        [Theory(DisplayName = "HttpRequestData.AddLink (pass)")]
+        [InlineData("http://localhost:7205/dingle/ball?value1=1&value2=2", "http://localhost:7205","dingle/ball?value1=1&value2=2")]
+        [InlineData("https://foo.bar/dingle","https://foo.bar", "dingle")]
+        [InlineData("https://foo.bar","https://foo.bar", null)]
+        [InlineData("https://foo.bar","https://foo.bar", "")]
+        [InlineData("https://foo.bar","https://foo.bar","\t")]
+        public void AddLinkHttpRequestDataPassTest(string result,string url, string relativeUrl)
+        {
+            var links = GetHttpRequestData(url)
+                .AddLink(rel, relativeUrl)
+                .Build();
+
+            Assert.Single(links);
+            Assert.Equal(result, links.First().Href);
+            Assert.Equal(rel, links.First().Rel);
+        }
+
+        private TestHttpRequestData GetHttpRequestData(string result)
+        {
+            return new TestHttpRequestData(result);
+        }
+
         [Theory(DisplayName = "String.AddLink (pass)")]
         [InlineData("https://foo.bar/dingle/ball?value1=1&value2=2", "dingle/ball?value1=1&value2=2")]
         [InlineData("https://foo.bar/dingle", "dingle")]
