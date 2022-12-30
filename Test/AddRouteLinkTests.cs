@@ -14,7 +14,18 @@ namespace MeyerCorp.HateoasBuilder.Test
         {
             var links = GetHttpContext().AddRouteLink(rel, items).Build();
 
-            Assert.Equal(new Link(rel,result), links.First());
+            Assert.Equal(new Link(rel, result), links.First());
+        }
+
+        [Theory(DisplayName = "HttpRequestData.AddRouteLink (pass).")]
+        [InlineData("https://foo.bar/relative/ball", new object[] { "relative", "ball" })]
+        [InlineData("https://foo.bar/relative1/ball/dingle", new object[] { "relative1", "ball", "dingle" })]
+        [InlineData("https://foo.bar/relative2/ball/dingle/2", new object[] { "relative2", "ball", "dingle", 2 })]
+        public void AddRouteLinkHttpRequestDataPass(string result, object[] items)
+        {
+            var links = GetHttpRequestData().AddRouteLink(rel, items).Build();
+
+            Assert.Equal(new Link(rel, result), links.First());
         }
 
         [Theory(DisplayName = "String.AddRouteLink (pass).")]

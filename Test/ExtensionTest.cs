@@ -19,6 +19,11 @@ namespace MeyerCorp.HateoasBuilder.Test
             });
         }
 
+        protected static TestHttpRequestData GetHttpRequestData()
+        {
+            return new TestHttpRequestData(baseUrl);
+        }
+
         [Theory(DisplayName = "ToHrefTest (pass).")]
         [InlineData("href")]
         [InlineData("href2")]
