@@ -5,8 +5,9 @@ using System.Text;
 
 namespace MeyerCorp.HateoasBuilder
 {
-    internal class LinkInformation
+    internal class LinkInformation 
     {
+        internal bool IsExternal { get; }
         readonly string RelativeUrl = String.Empty;
 
         internal LinkInformation(string? rawRelativeUrl)
@@ -18,6 +19,11 @@ namespace MeyerCorp.HateoasBuilder
         {
             if (routeItems != null) RouteItems.AddRange(routeItems);
             if (queryItems != null) QueryItems.AddRange(queryItems);
+        }
+
+        public LinkInformation(string? rawRelativeUrl, bool isExternal) : this(rawRelativeUrl)
+        {
+            IsExternal = isExternal;
         }
 
         internal List<object> RouteItems { get; } = new List<object>();
