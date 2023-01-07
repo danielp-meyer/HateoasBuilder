@@ -67,5 +67,23 @@ namespace MeyerCorp.HateoasBuilder.Test
 
             Assert.Equal(result, caught.Message);
         }
+
+        [Theory(DisplayName = "HttpContext.AddLink.AddParameters (pass)")]
+        // [InlineData(true, "https://foo.bar/relativeUrl", "https://foo.bar/relativeUrl1", 2)]
+        [InlineData(false, "https://foo.bar/relativeUrl", "https://foo.bar/relativeUrl1", 2)]
+        public void CheckCOnditionalAdds(bool condition, string result1, string result2, int count)
+        {
+            var links = "https://foo.bar"
+                .AddQueryLink(condition, rel, "relativeUrl")
+                .AddQueryLink(!condition, rel, "relativeUrl")
+                .AddQueryLink(rel, "relativeUrl1")
+                .Build();
+
+            Assert.Equal(count, links.Count());
+            Assert.Equal(result1, links.First().Href);
+            Assert.Equal(result2, links.Last().Href);
+            Assert.Equal(rel, links.First().Rel);
+            Assert.Equal(rel, links.Last().Rel);
+        }
     }
 }
