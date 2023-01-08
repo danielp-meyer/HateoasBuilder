@@ -69,14 +69,14 @@ namespace MeyerCorp.HateoasBuilder.Test
         }
 
         [Theory(DisplayName = "HttpContext.AddLink.AddParameters (pass)")]
-        // [InlineData(true, "https://foo.bar/relativeUrl", "https://foo.bar/relativeUrl1", 2)]
-        [InlineData(false, "https://foo.bar/relativeUrl", "https://foo.bar/relativeUrl1", 2)]
+        [InlineData(true, "https://foo.bar/relativeUrl?param1=value1", "https://foo.bar/relativeUrl1?param1=value1", 2)]
+        [InlineData(false, "https://foo.bar/relativeUrl?param1=value1", "https://foo.bar/relativeUrl1?param1=value1", 2)]
         public void CheckCOnditionalAdds(bool condition, string result1, string result2, int count)
         {
             var links = "https://foo.bar"
-                .AddQueryLink(condition, rel, "relativeUrl")
-                .AddQueryLink(!condition, rel, "relativeUrl")
-                .AddQueryLink(rel, "relativeUrl1")
+                .AddQueryLink(condition, rel, "relativeUrl", "param1", "value1")
+                .AddQueryLink(!condition, rel, "relativeUrl", "param1", "value1")
+                .AddQueryLink(rel, "relativeUrl1", "param1", "value1")
                 .Build();
 
             Assert.Equal(count, links.Count());
