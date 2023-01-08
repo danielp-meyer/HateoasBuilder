@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>MeyerCorp.HateoasBuilder</AssemblyName>
     <RootNamespace>MeyerCorp.HateoasBuilder</RootNamespace>
     <PackageId>MeyerCorp.HateoasBuilder</PackageId>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <Authors>danielpmeyer</Authors>
     <Company>MeyerCorporation</Company>
     <Description>Extension based builder for creating HATEOAS links in RESTful reponses in .NET.</Description>
@@ -17,7 +16,10 @@
     <RepositoryUrl>https://github.com/MeyerCorporation/HateoasBuilder.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>HATEOAS, WebAPI, REST</PackageTags>
-    <PackageReleaseNotes>It's a release.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      Fix bug:
+      <a href="https://github.com/MeyerCorporation/HateoasBuilder/issues/16">#16</a>
+    </PackageReleaseNotes>
     <NeutralLanguage>en-US</NeutralLanguage>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -25,7 +27,6 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\LICENSE.md">
       <Pack>True</Pack>
@@ -36,19 +37,16 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Meyer_M_Blue.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
 </Project>
