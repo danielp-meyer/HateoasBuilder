@@ -161,6 +161,8 @@ namespace MeyerCorp.HateoasBuilder
         /// </remarks>
         public LinkBuilder AddRouteLink(string relLabel, params object[] routeItems)
         {
+            LastIgnored = false;
+            
             if (routeItems == null) throw new ArgumentNullException(nameof(routeItems));
             if (routeItems.Length > 1 && routeItems.Any(ri => ri == null)) throw new ArgumentException($"No elements in the collection can be null.", nameof(routeItems));
 
