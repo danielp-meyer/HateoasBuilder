@@ -16,16 +16,7 @@ namespace MeyerCorp.HateoasBuilder
             Href = href;
         }
 
-        public override bool Equals(object obj)
-        {
-            var value = obj as Link;
-
-            if (value == null)
-                return false;
-            else
-                return value.Rel == Rel
-                    && value.Href == Href;
-        }
+        public override bool Equals(object? obj) => obj is Link value && value.Rel == Rel && value.Href == Href;
 
         public override int GetHashCode()
         {
